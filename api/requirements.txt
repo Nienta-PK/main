@@ -1,0 +1,12 @@
+fastAPI[standard]
+pydantic
+jose
+passlib
+uvicorn
+databases[asyncpg]
+SQLAlchemy
+python-jose
+bcrypt
+python-dotenv
+requests
+psycopg2

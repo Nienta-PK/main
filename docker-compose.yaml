@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: ./nextjs  # Path to the Next.js project
+    ports:
+      - "3000:3000"  # Expose Next.js on port 3000
+    volumes:
+      - ./nextjs:/src
+      - /src/node_modules  # Manage node_modules inside the container
+    working_dir: /src
+    command: npm run dev
+    networks:
+      - app-network
+
+  fastapi:
+    build:
+      context: ./api  # Path to the FastAPI project
+    ports:
+      - "8000:8000"  # Expose FastAPI on port 8000
+    volumes:
+      - ./api:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app-network
+
+  db:
+    container_name: advcompro_project
+    image: postgres:13
+    restart: always
+    ports:
+      - "5432:5432"  # Expose Postgres on port 5432
+    environment:
+      POSTGRES_USER: tata
+      POSTGRES_PASSWORD: 663266
+      POSTGRES_DB: advcompro_project
+    networks:
+      - app-network
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: tata6632@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: T@ta6632tata
+    ports:
+      - "5050:80"  # Expose PgAdmin on port 5050
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge  # Use bridge networking for internal communication

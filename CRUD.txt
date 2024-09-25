@@ -1,0 +1,86 @@
+
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, EmailStr, validator
+from api.models import User
+from api.database import engine, Base
+from api.deps import db_dependency, get_current_user, AuthUser
+from datetime import datetime
+from passlib.context import CryptContext
+from typing import Annotated
+
+router = APIRouter(
+    prefix='/crud',
+    tags=['crud']
+)
+
+Base.metadata.create_all(bind=engine)
+
+class UserResponse(BaseModel):
+    user_id: int
+    username: str
+    email: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+
+    @validator('password')
+    def password_strength(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_password(plain_password: str) -> str:
+    return pwd_context.hash(plain_password)
+
+@router.post("/users/", response_model=UserResponse)
+async def create_user(user: UserCreate, db: db_dependency):
+    # This endpoint remains open for new user registrations
+    existing_user = db.query(User).filter(
+        (User.username == user.username) | (User.email == user.email)
+    ).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Username or email already registered"
+        )
+
+    hashed_password = hash_password(user.password)
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        password=hashed_password
+    )
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    return db_user
+
+@router.get("/users/me/", response_model=UserResponse)
+async def get_current_user_info(
+    current_user: Annotated[AuthUser, Depends(get_current_user)]
+):
+    return current_user
+
+@router.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(
+    user_id: int,
+    db: db_dependency,
+    current_user: Annotated[AuthUser, Depends(get_current_user)]
+):
+    # Optionally restrict access to own data
+    if user_id != current_user.user_id:
+         raise HTTPException(status_code=403, detail="Not authorized to access this user")
+
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user

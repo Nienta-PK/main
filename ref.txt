@@ -1,0 +1,6 @@
+"""https://www.youtube.com/watch?v=398DuQbQJq0
+https://www.youtube.com/watch?v=RUrixH3i4j8
+https://www.youtube.com/watch?v=FOZNYBu8u18
+https://www.youtube.com/watch?v=g566eI2EmeY
+https://github.com/jeremyleonardo/books-crud-fastapi/blob/master/app/main.py
+https://www.youtube.com/watch?v=GtFfrOng-A0"""
