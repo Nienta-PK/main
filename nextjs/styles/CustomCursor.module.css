@@ -1,0 +1,60 @@
+/* CustomCursor.module.css */
+
+/* Nyan Cat cursor for the animation */
+.nyanCat {
+    width: 60px;
+    height: 40px;
+    background-image: url('/images/nyan-cat.png'); /* Path to Nyan Cat image */
+    background-size: cover;
+    position: fixed;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+
+/* Particle splash container */
+.splash {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+/* Particle (rainbow-colored circle) */
+.splash div {
+    width: 10px;
+    height: 10px;
+    margin: 5px;
+    border-radius: 50%;
+    position: absolute;
+    animation: particleMove 1.5s ease-out forwards;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6); /* Glowing effect */
+}
+
+/* Rainbow colors for particles */
+.splash div:nth-child(1) { background-color: #ff0000; } /* Red */
+.splash div:nth-child(2) { background-color: #ff7f00; } /* Orange */
+.splash div:nth-child(3) { background-color: #ffff00; } /* Yellow */
+.splash div:nth-child(4) { background-color: #7fff00; } /* Green */
+.splash div:nth-child(5) { background-color: #00ff00; } /* Lime */
+.splash div:nth-child(6) { background-color: #00ff7f; } /* Spring Green */
+.splash div:nth-child(7) { background-color: #00ffff; } /* Cyan */
+.splash div:nth-child(8) { background-color: #007fff; } /* Azure */
+.splash div:nth-child(9) { background-color: #0000ff; } /* Blue */
+.splash div:nth-child(10) { background-color: #7f00ff; } /* Violet */
+.splash div:nth-child(11) { background-color: #ff00ff; } /* Magenta */
+.splash div:nth-child(12) { background-color: #ff007f; } /* Hot Pink */
+.splash div:nth-child(13) { background-color: #ff66ff; } /* Pink */
+.splash div:nth-child(14) { background-color: #ff33ff; } /* Light Pink */
+.splash div:nth-child(15) { background-color: #ff99ff; } /* Light Violet */
+
+/* Animation for particle movement */
+@keyframes particleMove {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--x), var(--y)) scale(2); /* Spread out and get larger */
+    }
+}

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useRouter } from 'next/router'; // Import useRouter
+import { useRouter } from 'next/router';
 import NavigationLayout from './NavigationBar';
 import FooterLayout from './Footer';
+import CustomCursor from './CustomCursor'; // Import the custom cursor
 
 const lightTheme = createTheme({
   palette: {
@@ -39,7 +40,8 @@ const darkTheme = createTheme({
 
 export default function Layout({ children }) {
   const [darkMode, setDarkMode] = useState(false);
-  const router = useRouter(); // Get the current route
+  const [customCursorEnabled, setCustomCursorEnabled] = useState(true); // State to toggle custom cursor
+  const router = useRouter();
 
   // Load theme preference from localStorage
   useEffect(() => {
@@ -55,20 +57,29 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
   };
 
-  // Pages where you want to hide navigation or footer
-  const noNavPages = ['/','/login', '/register']; // Add paths where you don't want the navigation bar
-  const noFooterPages = ['/login', '/register']; // Add paths where you don't want the footer
+  const toggleCustomCursor = () => {
+    setCustomCursorEnabled((prev) => !prev);
+  };
+
+  const noNavPages = ['/', '/login', '/register'];
+  const noFooterPages = ['/login', '/register'];
 
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
       <div>
-        {/* Conditionally render NavigationBar */}
+        {/* Conditionally render Custom Cursor based on the toggle state */}
+        {customCursorEnabled && <CustomCursor />} 
+
         {!noNavPages.includes(router.pathname) && (
-          <NavigationLayout toggleTheme={toggleTheme} darkMode={darkMode} />
+          <NavigationLayout
+            toggleTheme={toggleTheme}
+            darkMode={darkMode}
+            customCursorEnabled={customCursorEnabled}
+            toggleCustomCursor={toggleCustomCursor} // Pass toggle function and state
+          />
         )}
         <main>{children}</main>
-        {/* Conditionally render Footer */}
         {!noFooterPages.includes(router.pathname) && (
           <FooterLayout darkMode={darkMode} />
         )}

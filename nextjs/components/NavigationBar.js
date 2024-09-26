@@ -15,7 +15,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';  // Moon Icon for
 import Brightness7Icon from '@mui/icons-material/Brightness7';  // Sun Icon for Light Mode
 import useBearStore from '@/store/useBearStore';
 
-const NavigationLayout = ({ darkMode, toggleTheme }) => {
+const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCustomCursor }) => {
   const router = useRouter();
   const appName = useBearStore((state) => state.appName);
 
@@ -67,6 +67,16 @@ const NavigationLayout = ({ darkMode, toggleTheme }) => {
           <IconButton onClick={toggleTheme} sx={{ ml: 1 }}>
             {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
+
+          {/* Toggle Custom Cursor Button */}
+          <Button
+            onClick={toggleCustomCursor}
+            color={customCursorEnabled ? 'success' : 'error'} // Change color based on custom cursor state
+            variant="contained"
+            sx={{ ml: 2 }}
+          >
+            {customCursorEnabled ? 'Disable Custom Cursor' : 'Enable Custom Cursor'}
+          </Button>
         </Toolbar>
       </AppBar>
     </>
