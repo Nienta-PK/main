@@ -1,5 +1,5 @@
 // withAuth.js
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 
@@ -7,25 +7,25 @@ const withAuth = (WrappedComponent) => {
   return (props) => {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [manualLoggedIn, setManualLoggedIn] = useState(false);
 
     useEffect(() => {
-      if (status === 'loading') {
-        // Optionally show a loading indicator
-        return;
+      const token = localStorage.getItem('token');  // Check for manual token
+
+      // If no session and no token, redirect to login
+      if (!session && !token && status !== 'loading') {
+        router.push('/login');
       }
 
-      if (!session) {
-        // User is not authenticated, redirect to login
-        router.push('/login');
+      // If a token exists, set the manual login state to true
+      if (token) {
+        setManualLoggedIn(true);
       }
     }, [session, status, router]);
 
-    if (status === 'loading') {
+    // Show a loading state while checking NextAuth session or manual token
+    if (status === 'loading' || (!session && !manualLoggedIn)) {
       return <div>Loading...</div>;
-    }
-
-    if (!session) {
-      return null; // Render nothing while redirecting
     }
 
     return <WrappedComponent {...props} />;
@@ -33,4 +33,3 @@ const withAuth = (WrappedComponent) => {
 };
 
 export default withAuth;
-

@@ -9,40 +9,29 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();  // Prevent the default form submission behavior
+  const handleManualLogin = async (e) => {
+    e.preventDefault();  // Prevent default form submission
 
     try {
-      // Create form data object
+      // Create form data object for FastAPI
       const formData = new URLSearchParams();
-      formData.append('username', email);  // FastAPI expects 'username', not 'email'
+      formData.append('username', email);
       formData.append('password', password);
-  
-      // Make a POST request to FastAPI's login endpoint with form data
+
+      // Send login request to FastAPI
       const response = await axios.post('http://localhost:8000/auth/login', formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',  // Send data as form-encoded
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-  
-      // Destructure the access token from the response
+
+      // Store the token in localStorage
       const { access_token } = response.data;
-  
-      // Store the token in localStorage for later use
       localStorage.setItem('token', access_token);
-  
-      // Redirect to the successfully login page after successful login
+
+      // Redirect to successfully login page
       window.location.href = "/successfully_login";
     } catch (err) {
-      // Handle any errors received from the backend
       const errorResponse = err.response?.data;
-      if (Array.isArray(errorResponse?.detail)) {
-        // If error detail is an array, map and display each error message
-        setError(errorResponse.detail.map((errItem) => errItem.msg).join(', '));
-      } else {
-        // Otherwise, just show the error message
-        setError(errorResponse?.detail || "Login failed. Please try again.");
-      }
+      setError(errorResponse?.detail || "Login failed. Please try again.");
     }
   };
 
@@ -55,19 +44,14 @@ export default function Login() {
       minHeight="100vh"
       bgcolor="background.default"
     >
-      <Paper
-        elevation={3}
-        sx={{ padding: 3, maxWidth: 400, width: '100%', borderRadius: 2 }}
-      >
+      <Paper elevation={3} sx={{ padding: 3, maxWidth: 400, width: '100%', borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold">
           Login
         </Typography>
 
-        {/* Display error message if any */}
         {error && <Typography color="error">{error}</Typography>}
 
-        <form onSubmit={handleLogin}>
-          {/* Input field for Email */}
+        <form onSubmit={handleManualLogin}>
           <TextField
             label="Email"
             variant="outlined"
@@ -76,47 +60,26 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
-          {/* Input field for Password with show/hide feature */}
           <TextField
             label="Password"
-            type={showPassword ? "text" : "password"} // Toggle password visibility
+            type={showPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-
-          {/* Button to toggle password visibility */}
-          <Button
-            variant="text"
-            onClick={() => setShowPassword(!showPassword)}
-            sx={{ textTransform: 'none', marginBottom: '16px' }}
-          >
+          <Button variant="text" onClick={() => setShowPassword(!showPassword)} sx={{ textTransform: 'none', marginBottom: '16px' }}>
             {showPassword ? "Hide Password" : "Show Password"}
           </Button>
-
-          {/* Login Button */}
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ marginTop: 2 }}
-          >
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: 2 }}>
             Login
           </Button>
         </form>
 
-        {/* Redirect to Register Page */}
         <Typography variant="body1" sx={{ marginTop: 2 }}>
           Don't have an account?
-          <Button
-            href="/register"
-            variant="text"
-            sx={{ textTransform: 'none', padding: 0, marginLeft: 1 }}
-          >
+          <Button href="/register" variant="text" sx={{ textTransform: 'none', padding: 0, marginLeft: 1 }}>
             Register
           </Button>
         </Typography>
@@ -125,7 +88,6 @@ export default function Login() {
           ----------------- Or Sign In With -----------------
         </Typography>
 
-        {/* Google Login Button */}
         <Button
           variant="outlined"
           fullWidth

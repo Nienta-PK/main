@@ -3,6 +3,7 @@ from routers import crud, auth, register, login, route_protector
 from fastapi.middleware.cors import CORSMiddleware
 from utils.database import engine, Base,SessionLocal 
 from fastapi.openapi.utils import get_openapi
+from utils.deps import AuthUser,get_current_user
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Task Manager Application")
@@ -50,6 +51,10 @@ def root():
 @app.get("/api/python")
 def hello_world():
     return {"message": "Welcome to Task Manager"}
+
+@app.get("/user/me", response_model=AuthUser)
+async def read_current_user(current_user: AuthUser = Depends(get_current_user)):
+    return current_user
 
 #app.include_router(auth.router)
 app.include_router(crud.router)
