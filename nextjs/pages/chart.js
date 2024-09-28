@@ -14,3 +14,8 @@ function ChartPage() {
 }
 
 export default withAuth(ChartPage);
+export async function getServerSideProps(context) {
+  return {
+    props: {},
+  };
+}

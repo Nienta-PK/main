@@ -8,6 +8,7 @@ import Layout from "@/components/layout";
 import useBearStore from "@/store/useBearStore";
 import Head from "next/head";
 import { Backdrop, CircularProgress } from "@mui/material";
+import { SessionProvider } from "next-auth/react";  // Uncommented this line to enable SessionProvider
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -22,17 +23,17 @@ const theme = createTheme({
   },
 });
 
-export default function App({ Component, pageProps, props }) {
+export default function App({ Component, pageProps: { session, ...pageProps }, props }) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const setAppName = useBearStore((state) => state.setAppName);
   const pageName = router.pathname;
-
+  
   React.useEffect(() => {
     console.log("App load", pageName, router.query);
     setLoading(true);
-    // TODO: This section is use to handle page change.
-    setAppName("Say Hi")
+    // Handle page change.
+    setAppName("Say Hi");
     setLoading(false);
   }, [router, pageName]);
 
@@ -45,13 +46,22 @@ export default function App({ Component, pageProps, props }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <AppCacheProvider {...props}>
-        <ThemeProvider theme={theme}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </ThemeProvider>
-      </AppCacheProvider>
+      {/* Wrap the application in SessionProvider */}
+      <SessionProvider session={session}>   
+        <AppCacheProvider {...props}>
+          <ThemeProvider theme={theme}>
+            <Layout>
+              {loading ? (
+                <Backdrop open={loading}>
+                  <CircularProgress color="inherit" />
+                </Backdrop>
+              ) : (
+                <Component {...pageProps} />
+              )}
+            </Layout>
+          </ThemeProvider>
+        </AppCacheProvider>
+      </SessionProvider>
     </React.Fragment>
   );
 }

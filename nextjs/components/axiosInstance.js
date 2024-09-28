@@ -1,4 +1,6 @@
+// axiosInstance.js
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
@@ -7,10 +9,10 @@ const axiosInstance = axios.create({
 
 // Add a request interceptor to include the token in the headers
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    const session = await getSession();
+    if (session && session.accessToken) {
+      config.headers.Authorization = `Bearer ${session.accessToken}`;
     }
     return config;
   },
@@ -22,8 +24,8 @@ axiosInstance.interceptors.response.use(
   (response) => response, // If the response is successful, just return it
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If the response status is 401 (Unauthorized), remove the token and redirect to login
-      localStorage.removeItem('token');
+      // If the response status is 401 (Unauthorized), redirect to login
+      // Optionally, you can sign out the user
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -31,5 +33,3 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
-
-

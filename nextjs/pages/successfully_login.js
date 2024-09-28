@@ -1,12 +1,24 @@
-//---nextjs/pages/successfully_login.js---//
+// --- pages/successfully_login.js ---
 import React from "react";
 import { Box, Typography, Button, Paper } from "@mui/material";
-import withAuth from '../hoc/withAuth'; // Import the HOC for protected routes
+import { signOut, useSession } from 'next-auth/react';
+import withAuth from '../hoc/withAuth'; // Adjust the import path if necessary
 
 function SuccessfullyLogin() {
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    // Shouldn't reach here due to withAuth, but handle gracefully
+    return <div>Redirecting...</div>;
+  }
+
   return (
-    <Box 
-      textAlign="center" 
+    <Box
+      textAlign="center"
       display="flex"
       justifyContent="center"
       alignItems="center"
@@ -17,7 +29,9 @@ function SuccessfullyLogin() {
         elevation={3}
         sx={{ padding: 3, maxWidth: 400, width: '100%', borderRadius: 2 }}
       >
-        <Typography variant="h4" gutterBottom fontWeight="bold">Welcome!</Typography>
+        <Typography variant="h4" gutterBottom fontWeight="bold">
+          Welcome, {session.user?.name || 'User'}!
+        </Typography>
         <Typography variant="body1" sx={{ marginTop: 2 }}>
           You have successfully logged in!
         </Typography>
@@ -28,10 +42,7 @@ function SuccessfullyLogin() {
           color="primary"
           fullWidth
           sx={{ marginTop: 2 }}
-          onClick={() => {
-            localStorage.removeItem('token'); // Remove the token from local storage
-            window.location.href = '/login'; // Redirect to login page
-          }}
+          onClick={() => signOut({ callbackUrl: '/login' })}
         >
           Logout
         </Button>
@@ -40,4 +51,4 @@ function SuccessfullyLogin() {
   );
 }
 
-export default withAuth(SuccessfullyLogin); // Wrap the component with the Auth HOC
+export default withAuth(SuccessfullyLogin);

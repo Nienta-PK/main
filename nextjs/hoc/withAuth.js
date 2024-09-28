@@ -1,31 +1,36 @@
+// withAuth.js
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import axiosInstance from '../components/axiosInstance'; // Import your axios instance
+import { useSession } from 'next-auth/react';
 
 const withAuth = (WrappedComponent) => {
   return (props) => {
+    const { data: session, status } = useSession();
     const router = useRouter();
 
     useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
+      if (status === 'loading') {
+        // Optionally show a loading indicator
         return;
       }
 
-      // Verify the token by calling a protected route
-      axiosInstance.get('/protected-route')
-        .then(() => {
-          // Token is valid, proceed with rendering the page
-        })
-        .catch(() => {
-          // Invalid token, redirect to login
-          router.push('/login');
-        }); 
-    }, [router]);
+      if (!session) {
+        // User is not authenticated, redirect to login
+        router.push('/login');
+      }
+    }, [session, status, router]);
+
+    if (status === 'loading') {
+      return <div>Loading...</div>;
+    }
+
+    if (!session) {
+      return null; // Render nothing while redirecting
+    }
 
     return <WrappedComponent {...props} />;
   };
 };
 
 export default withAuth;
+

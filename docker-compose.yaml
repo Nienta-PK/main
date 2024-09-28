@@ -7,13 +7,17 @@ services:
     ports:
       - "3000:3000"  # Expose Next.js on port 3000
     volumes:
-      - ./nextjs:/src
-      - /src/node_modules  # Manage node_modules inside the container
+      - ./nextjs:/src:delegated
+      - /src/node_modules   # Manage node_modules inside the container
     working_dir: /src
-    command: npm run dev
+    command: sh -c "npm install && npm run dev"
     networks:
       - app-network
-
+    depends_on:
+      - fastapi
+    env_file:
+      - ./nextjs/.env.local
+      
   fastapi:
     build:
       context: ./api  # Path to the FastAPI project
@@ -25,7 +29,7 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - app-network
-
+    
   db:
     container_name: advcompro_project
     image: postgres:13
@@ -40,7 +44,7 @@ services:
       - app-network
 
   pgadmin:
-    container_name: pgadmin4_container
+    container_name: pgadmin4_container  
     image: dpage/pgadmin4
     restart: always
     environment:

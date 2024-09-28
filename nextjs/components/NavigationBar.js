@@ -38,9 +38,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
           >
             TTM {darkMode ? '(Dark Mode)' : '(Light Mode)'}
           </Typography>
-          <NavigationLink href="/login" label="Login" />
-          <NavigationLink href="/page2" label="Page2" />
-          <NavigationLink href="/Nah" label="Page3" />
+          <NavigationLink href="/chart" label="Chart" />
           <NavigationLink href="/page3" label="Chat" />
           <div style={{ flexGrow: 1 }} />
           
