@@ -81,31 +81,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def hash_password(plain_password: str) -> str:
     return pwd_context.hash(plain_password)
 
-"""@router.post("/users/", response_model=UserResponse)
-async def create_user(user: UserCreate, db: db_dependency):
-    # Check if the user already exists
-    existing_user = db.query(User).filter(
-        (User.username == user.username) | (User.email == user.email)
-    ).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Username or email already registered"
-        )
-
-    hashed_password = hash_password(user.password)
-    db_user = User(
-        username=user.username,
-        email=user.email,
-        password=hashed_password
-    )
-
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
-    return db_user"""
-
 @router.get("/users/{user_id}",response_model=UserResponse)
 async def get_user(user_id: int, db: db_dependency,current_user: Annotated[AuthUser, Depends(get_current_user)]):
     if user_id != current_user.user_id and not current_user.is_admin:

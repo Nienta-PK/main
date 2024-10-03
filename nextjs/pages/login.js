@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Button, Paper, TextField } from '@mui/material';
 import axios from 'axios';
 import { signIn } from 'next-auth/react';
+import GoogleIcon from '@mui/icons-material/Google';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,30 +12,37 @@ export default function Login() {
 
   const handleManualLogin = async (e) => {
     e.preventDefault();  // Prevent default form submission
-
+  
     try {
       // Create form data object for FastAPI
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
-
+  
       // Send login request to FastAPI
       const response = await axios.post('http://localhost:8000/auth/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-
+  
       // Store the token in localStorage
-      const { access_token } = response.data;
+      const { access_token, user_id } = response.data;  // Get user_id from response
       localStorage.setItem('token', access_token);
 
       // Redirect to successfully login page
-      window.location.href = "/successfully_login";
+      window.location.href = "/home";
     } catch (err) {
+      // Check if the error response is available and handle it
       const errorResponse = err.response?.data;
-      setError(errorResponse?.detail || "Login failed. Please try again.");
+  
+      // If there's an error with the expected structure
+      if (errorResponse?.detail) {
+        setError(Array.isArray(errorResponse.detail) ? errorResponse.detail[0].msg : errorResponse.detail);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     }
   };
-
+  
   return (
     <Box
       textAlign="center"
@@ -92,9 +100,9 @@ export default function Login() {
           variant="outlined"
           fullWidth
           sx={{ marginTop: 2 }}
-          onClick={() => signIn('google', { callbackUrl: '/successfully_login' })}
+          onClick={() => signIn('google', { callbackUrl: '/home' })}
         >
-          Sign in with Google
+          <GoogleIcon sx={{ marginRight: 2 }} />Sign in with Google
         </Button>
       </Paper>
     </Box>

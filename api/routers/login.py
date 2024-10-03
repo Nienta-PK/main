@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from datetime import timedelta, datetime
-from typing import Annotated, Optional
+from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from utils.models import User as UserModel
+from utils.models import User as UserModel, Login_History as LoginHistoryModel  # Import Login_History model
 from utils.deps import db_dependency
 import os
 from dotenv import load_dotenv
@@ -33,6 +33,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_id: int  # Add user_id to the response model
 
 # Helper Functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -69,8 +70,20 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    # Log login history with the current timestamp
+    login_history = LoginHistoryModel(
+        user_id=user.user_id,
+        timestamp=datetime.utcnow()  # Use the current UTC time as the login timestamp
+    )
+    db.add(login_history)
+    db.commit()  # Commit the login history to the database
+
+    # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    # Return token, user_id, and token type
+    return {"access_token": access_token, "token_type": "bearer", "user_id": user.user_id}

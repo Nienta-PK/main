@@ -58,8 +58,17 @@ export default function Layout({ children }) {
   };
 
   const toggleCustomCursor = () => {
-    setCustomCursorEnabled((prev) => !prev);
+    setCustomCursorEnabled((prev) => !prev); // Toggle custom cursor state
   };
+
+  // Apply/remove customCursorEnabled class to hide system cursor when needed
+  useEffect(() => {
+    if (customCursorEnabled) {
+      document.body.classList.add('customCursorEnabled');
+    } else {
+      document.body.classList.remove('customCursorEnabled');
+    }
+  }, [customCursorEnabled]);
 
   const noNavPages = ['/', '/login', '/register'];
   const noFooterPages = ['/login', '/register'];
@@ -69,7 +78,7 @@ export default function Layout({ children }) {
       <CssBaseline />
       <div>
         {/* Conditionally render Custom Cursor based on the toggle state */}
-        {customCursorEnabled && <CustomCursor />} 
+        <CustomCursor useCustomCursor={customCursorEnabled} /> 
 
         {!noNavPages.includes(router.pathname) && (
           <NavigationLayout

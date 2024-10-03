@@ -3,7 +3,7 @@
 const API_URL = "http://fastapi:8000";
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: true, //Normally true
   // output: 'export',
   images: {
     unoptimized: true,

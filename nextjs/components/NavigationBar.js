@@ -4,27 +4,159 @@ import {
   Toolbar,
   Typography,
   Button,
-  TextField,
   IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Switch,
+  Fade,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import FunctionsIcon from '@mui/icons-material/Functions';
 import PersonIcon from '@mui/icons-material/Person';
-import Brightness4Icon from '@mui/icons-material/Brightness4';  // Moon Icon for Dark Mode
-import Brightness7Icon from '@mui/icons-material/Brightness7';  // Sun Icon for Light Mode
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import CloseIcon from '@mui/icons-material/Close';
 import useBearStore from '@/store/useBearStore';
+import { signOut } from 'next-auth/react';
+import GridOnIcon from '@mui/icons-material/GridOn';
 
 const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCustomCursor }) => {
   const router = useRouter();
   const appName = useBearStore((state) => state.appName);
 
+  // State to control the drawer
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  // Function to toggle the drawer state
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
+
+  // Menu item click handler
+  const handleMenuClick = (path) => {
+    setDrawerOpen(false); // Close the drawer
+    router.push(path);    // Navigate to the selected path
+  };
+
+  // Drawer content with header
+  const drawerContent = (
+    <Box
+      sx={{ width: 250 }}
+      role="presentation"
+      onKeyDown={toggleDrawer(false)}
+    >
+      {/* Header with Settings text and close button */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '10px 16px',
+        }}
+      >
+        <Typography variant="h6">Settings</Typography>
+        <IconButton onClick={toggleDrawer(false)}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Divider />
+
+      {/* List of menu items */}
+      <List>
+        <ListItem button onClick={() => handleMenuClick('/account')}>
+          <ListItemIcon>
+            <PersonIcon />
+          </ListItemIcon>
+          <ListItemText primary="User Account" />
+        </ListItem>
+        <ListItem button onClick={() => handleMenuClick('/support')}>
+          <ListItemIcon>
+            <SupportAgentIcon />
+          </ListItemIcon>
+          <ListItemText primary="Contact Support" />
+        </ListItem>
+        <Divider />
+
+        {/* Accordion to group theme and cursor toggles */}
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography>Display Settings</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {/* Toggle Custom Cursor Switch */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography>Custom Cursor</Typography>
+              <Switch
+                checked={customCursorEnabled}
+                onChange={toggleCustomCursor}
+                color="primary"
+              />
+            </Box>
+            {/* Toggle Theme Switch */}
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              {/* Box for Typography and Icon together */}
+              <Box display="flex" alignItems="center">
+                <Typography>Dark Mode</Typography>
+
+                {/* Fade transition for changing icon */}
+                <Fade in={true} timeout={600}>
+                  <IconButton edge="end" color="inherit">
+                    {darkMode ? <Brightness4Icon /> : <Brightness7Icon />}
+                  </IconButton>
+                </Fade>
+              </Box>
+
+              {/* Switch for toggling the theme */}
+              <Switch
+                checked={darkMode}
+                onChange={toggleTheme}
+                color="primary"
+              />
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+
+        <ListItem
+          button
+          onClick={() => {
+            localStorage.removeItem('token');  // Clear the token from localStorage
+            signOut({ callbackUrl: '/login' });  // Sign out and redirect to login page
+          }}
+        >
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
+    </Box>
+  );
+
   return (
     <>
       <AppBar position="sticky">
         <Toolbar>
-          <Link href={'/'}>
-            <FunctionsIcon sx={{ color: '#ffffff' }} fontSize="large" />
+          <Link href={'/home'}>
+            <GridOnIcon sx={{ color: '#ffffff' }} fontSize="large" />
           </Link>
           <Typography
             variant="body1"
@@ -36,67 +168,32 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
               fontFamily: 'Prompt',
             }}
           >
-            TTM {darkMode ? '(Dark Mode)' : '(Light Mode)'}
+            RAI Sudoku
           </Typography>
-          <NavigationLink href="/chart" label="Chart" />
-          <NavigationLink href="/page3" label="Chat" />
+
           <div style={{ flexGrow: 1 }} />
-          
-          {/* Search Field */}
-          <TextField
-            id="filled-basic"
-            label="Search"
-            variant="filled"
-            InputProps={{ style: { color: '#ffffff' } }}
-            InputLabelProps={{ style: { color: '#ffffff' } }}
-          />
 
-          {/* Account Icon */}
-          <Button
+          {/* Settings Icon to open side menu */}
+          <IconButton
             color="inherit"
-            onClick={() => {
-              router.push('/account');
-            }}
+            onClick={toggleDrawer(true)}
           >
-            <PersonIcon />
-          </Button>
-
-          {/* Toggle Theme Icon */}
-          <IconButton onClick={toggleTheme} sx={{ ml: 1 }}>
-            {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+            <SettingsIcon />
           </IconButton>
-
-          {/* Toggle Custom Cursor Button */}
-          <Button
-            onClick={toggleCustomCursor}
-            color={customCursorEnabled ? 'success' : 'error'} // Change color based on custom cursor state
-            variant="contained"
-            sx={{ ml: 2 }}
-          >
-            {customCursorEnabled ? 'Disable Custom Cursor' : 'Enable Custom Cursor'}
-          </Button>
         </Toolbar>
       </AppBar>
+
+      {/* Drawer component for side menu */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+      >
+        {drawerContent}
+      </Drawer>
     </>
   );
 };
 
-const NavigationLink = ({ href, label }) => {
-  return (
-    <Link href={href} style={{ textDecoration: 'none' }}>
-      <Typography
-        variant="body1"
-        sx={{
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-          padding: '0 10px',
-        }}
-      >
-        {label}
-      </Typography>
-    </Link>
-  );
-};
-
 export default NavigationLayout;
+

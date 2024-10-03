@@ -1,4 +1,16 @@
-/* Constants for font and colors */
+/* Global styles including cursor handling */
+
+/* Hide the default system cursor and all its types when this class is applied to the body */
+.customCursorEnabled, 
+.customCursorEnabled a, 
+.customCursorEnabled button, 
+.customCursorEnabled [role="button"], 
+.customCursorEnabled input, 
+.customCursorEnabled textarea, 
+.customCursorEnabled select {
+  cursor: none !important; /* Hide pointer, text, and other system cursors */
+}
+
 :root {
   --font-family: 'Roboto', sans-serif;
   --background-color: rgb(255, 255, 255);
@@ -6,8 +18,6 @@
   --border-radius: 5px;
   --text-color: white;
   --text-background: rgba(0, 0, 0, 0.43);
-  --cursor-default: url('/images/nyan-cat.png') 32 32, none; /* Nyan Cat cursor */
-  --cursor-pointer: url('/images/rainbow-cat.png') 32 32, none; /* Rainbow Cat cursor */
 }
 
 /* Font-face definition for Prompt fonts */
@@ -44,19 +54,4 @@ html, body {
   background-color: var(--text-background);
   font-size: 24px;
   border-radius: var(--border-radius);
-}
-
-/* Default cursor for the entire application (Nyan Cat) */
-html, body {
-  cursor: var(--cursor-default); /* Nyan Cat cursor */
-}
-
-/* Replace the pointer cursor with Rainbow Cat */
-a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], label, select {
-  cursor: var(--cursor-pointer) !important; /* Rainbow Cat cursor for all clickable elements */
-}
-
-/* Remove specific cursor styles for inputs, text areas, and selection */
-input, textarea, ::selection {
-  cursor: var(--cursor-default) !important; /* Apply the Nyan Cat cursor for text fields and selections */
 }
