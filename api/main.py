@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
-from routers import crud, auth, register, login, route_protector
+from routers import crud, auth, register, login, route_protector, play_history, login_history
 from fastapi.middleware.cors import CORSMiddleware
 from utils.database import engine, Base,SessionLocal 
 from fastapi.openapi.utils import get_openapi
@@ -61,3 +61,5 @@ app.include_router(crud.router)
 app.include_router(register.router)
 app.include_router(login.router)
 app.include_router(route_protector.router)
+app.include_router(play_history.router)
+app.include_router(login_history.router)

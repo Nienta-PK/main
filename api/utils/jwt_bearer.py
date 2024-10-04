@@ -20,16 +20,19 @@ class JWTBearer(HTTPBearer):
             if not credentials.scheme == "Bearer":
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
             token = credentials.credentials
-            if not self.verify_jwt(token):
+            payload = self.verify_jwt(token)
+            if not payload:
                 raise HTTPException(status_code=403, detail="Invalid or expired token.")
             return token  # Return the token for further processing
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
-    def verify_jwt(self, jwtoken: str) -> bool:
+    def verify_jwt(self, jwtoken: str) -> Optional[dict]:
         try:
+            # Decode the JWT token
             payload = jwt.decode(jwtoken, SECRET_KEY, algorithms=[ALGORITHM])
-            # Optionally, add additional checks here (e.g., verify claims)
-            return True
-        except JWTError:
-            return False
+            # Optionally, you can add more validation (e.g., check token expiry)
+            return payload  # Return the payload if token is valid
+        except JWTError as e:
+            print(f"JWT decoding error: {e}")  # Log the error for debugging
+            return None

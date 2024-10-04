@@ -1,4 +1,3 @@
-// --- pages/api/auth/[...nextauth].js ---
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -6,12 +5,10 @@ import axios from 'axios';
 
 export default NextAuth({
   providers: [
-    // Google Provider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    // Credentials Provider for Manual Login
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -20,27 +17,22 @@ export default NextAuth({
       },
       async authorize(credentials) {
         try {
-          // Use URLSearchParams to encode form data
           const formData = new URLSearchParams();
-          formData.append('username', credentials.username);  // The key should match what your FastAPI expects
+          formData.append('username', credentials.username);
           formData.append('password', credentials.password);
 
-          // Send a POST request to your FastAPI backend
           const response = await axios.post(
-            'http://fastapi:8000/auth/login',
+            'http://localhost:8000/auth/login', // or use `process.env.BACKEND_URL` if set
             formData,
-            {
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            }
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
           );
 
           const data = response.data;
-
           if (data && data.access_token) {
-            // Return user object to be saved in session
             return {
-              name: credentials.username,  // Adjust as needed
+              name: credentials.username,
               accessToken: data.access_token,
+              userId: data.user_id, // Assuming user_id is returned
             };
           } else {
             return null;
@@ -54,16 +46,38 @@ export default NextAuth({
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    async signIn({ user, account }) {
+      if (account.provider === 'google') {
+        const { email, name } = user;
+        try {
+          const response = await axios.get(`${process.env.BACKEND_URL}/crud/users`, {
+            params: { email },
+          });
+
+          if (!response.data.exists) {
+            await axios.post(`${process.env.BACKEND_URL}/auth/register`, {
+              email,
+              name,
+              password: 'GoogleAuthPassword123!' // Provide a default password if required
+            });
+          }
+        } catch (error) {
+          console.error("Error during sign-in callback:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (account && user) {
         token.accessToken = user.accessToken || token.accessToken;
-        token.user = user;
+        token.userId = user.userId || token.userId;
       }
       return token;
     },
     async session({ session, token }) {
       session.accessToken = token.accessToken;
-      session.user = token.user || session.user;
+      session.user.id = token.userId;
       return session;
     },
   },

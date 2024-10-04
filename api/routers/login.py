@@ -58,6 +58,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 # Login Endpoint
+# Updated login_for_access_token to log all date components
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
     db: db_dependency,
@@ -71,10 +72,18 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Log login history with the current timestamp
+    # Current date and time
+    current_time = datetime.utcnow() + timedelta(hours=7)
+    weekday = current_time.isoweekday()  # ISO weekday: Monday=1, Sunday=7
+
+    # Log login history
     login_history = LoginHistoryModel(
         user_id=user.user_id,
-        timestamp=datetime.utcnow()  # Use the current UTC time as the login timestamp
+        time=current_time.time(),  # Store only time
+        day=current_time.day,
+        month=current_time.month,
+        year=current_time.year,
+        weekday_id=weekday  # Use ISO weekday directly if it matches Weekday table ids
     )
     db.add(login_history)
     db.commit()  # Commit the login history to the database

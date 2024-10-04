@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from utils.jwt_bearer import JWTBearer
 
-# ---------------- Load Evironment ----------------- #
+# ---------------- Load Environment ----------------- #
 load_dotenv()
 SECRET_KEY = os.getenv('AUTH_SECRET_KEY')
 ALGORITHM = os.getenv('AUTH_ALGORITHM')
@@ -30,9 +30,10 @@ class AuthUser(BaseModel):
 
     class Config:
         from_attributes = True
-# ------------------ Get Database Dependency-------------------- #
+
+# ------------------ Get Database Dependency -------------------- #
 def get_db():
-    db =  SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
@@ -40,10 +41,7 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# -------------------- OAuth2PasswordBearer ------------------------- #
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-
-# ------------------ JWTBearer -------------------- #
+# -------------------- JWTBearer -------------------- #
 jwt_bearer = JWTBearer()
 
 # -------------------- Get Current User ---------------------- #
@@ -59,14 +57,15 @@ async def get_current_user(
     try:
         # Decode the JWT token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        username: str = payload.get("sub")  # Extract the 'sub' claim from the payload
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-    except JWTError:
+    except JWTError as e:
+        print(f"JWTError: {e}")  # Debugging log
         raise credentials_exception
 
-    # Retrieve the user from the database
+    # Retrieve the user from the database based on the username
     user = db.query(UserModel).filter(UserModel.username == token_data.username).first()
     if user is None:
         raise credentials_exception
@@ -79,11 +78,3 @@ async def get_current_user(
         is_active=user.is_active,
         is_admin=user.is_admin
     )
-
-# ------------------ Commit&Rollback ------------------- #
-async def commit_rollback():
-    try:
-        await SessionLocal.commit()
-    except Exception:
-        await SessionLocal.rollback()
-        raise 

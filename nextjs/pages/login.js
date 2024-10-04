@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Paper, TextField } from '@mui/material';
 import axios from 'axios';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import GoogleIcon from '@mui/icons-material/Google';
 
 export default function Login() {
@@ -9,32 +9,40 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const { data: session, status } = useSession(); // Access session data
+
+  // Store token and user_id in localStorage after Google Sign-In
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      const accessToken = session.accessToken; // Make sure accessToken is available in session
+      const userId = session.user?.id; // Ensure `user.id` is available in session data
+
+      if (accessToken && userId) {
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('user_id', user_id);
+        window.location.href = '/home'; // Redirect after storing data
+      }
+    }
+  }, [session, status]);
 
   const handleManualLogin = async (e) => {
-    e.preventDefault();  // Prevent default form submission
-  
+    e.preventDefault();
+
     try {
-      // Create form data object for FastAPI
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
-  
-      // Send login request to FastAPI
+
       const response = await axios.post('http://localhost:8000/auth/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-  
-      // Store the token in localStorage
-      const { access_token, user_id } = response.data;  // Get user_id from response
-      localStorage.setItem('token', access_token);
 
-      // Redirect to successfully login page
+      const { access_token, user_id } = response.data;
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user_id', user_id);
       window.location.href = "/home";
     } catch (err) {
-      // Check if the error response is available and handle it
       const errorResponse = err.response?.data;
-  
-      // If there's an error with the expected structure
       if (errorResponse?.detail) {
         setError(Array.isArray(errorResponse.detail) ? errorResponse.detail[0].msg : errorResponse.detail);
       } else {
@@ -42,7 +50,7 @@ export default function Login() {
       }
     }
   };
-  
+
   return (
     <Box
       textAlign="center"
@@ -100,7 +108,7 @@ export default function Login() {
           variant="outlined"
           fullWidth
           sx={{ marginTop: 2 }}
-          onClick={() => signIn('google', { callbackUrl: '/home' })}
+          onClick={() => signIn('google', { callbackUrl: '/home'})}
         >
           <GoogleIcon sx={{ marginRight: 2 }} />Sign in with Google
         </Button>

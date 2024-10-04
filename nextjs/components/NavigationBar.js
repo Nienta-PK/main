@@ -17,6 +17,8 @@ import {
   AccordionDetails,
   Switch,
   Fade,
+  Menu,
+  MenuItem,  // Import Menu and MenuItem
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/router';
@@ -31,6 +33,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import useBearStore from '@/store/useBearStore';
 import { signOut } from 'next-auth/react';
 import GridOnIcon from '@mui/icons-material/GridOn';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; // Import icon for dropdown
 
 const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCustomCursor }) => {
   const router = useRouter();
@@ -39,18 +42,29 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
   // State to control the drawer
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
+  // State to control the page navigation menu
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigation = (path) => {
+    setAnchorEl(null);
+    router.push(path);  // Navigate to the selected path
+  };
+
   // Function to toggle the drawer state
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
     setDrawerOpen(open);
-  };
-
-  // Menu item click handler
-  const handleMenuClick = (path) => {
-    setDrawerOpen(false); // Close the drawer
-    router.push(path);    // Navigate to the selected path
   };
 
   // Drawer content with header
@@ -78,13 +92,13 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
 
       {/* List of menu items */}
       <List>
-        <ListItem button onClick={() => handleMenuClick('/account')}>
+        <ListItem button onClick={() => handleNavigation('/account')}>
           <ListItemIcon>
             <PersonIcon />
           </ListItemIcon>
           <ListItemText primary="User Account" />
         </ListItem>
-        <ListItem button onClick={() => handleMenuClick('/support')}>
+        <ListItem button onClick={() => handleNavigation('/support')}>
           <ListItemIcon>
             <SupportAgentIcon />
           </ListItemIcon>
@@ -172,6 +186,28 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
           </Typography>
 
           <div style={{ flexGrow: 1 }} />
+
+          {/* Page Navigation Drop-down Menu */}
+          <Button
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            onClick={handleMenuClick}
+            endIcon={<ArrowDropDownIcon />}
+            sx={{ color: 'white' }}
+          >
+            Pages
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={() => handleNavigation('/dashboard')}>Dashboard</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/ranking')}>Ranking</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/play-history')}>Game History</MenuItem>
+          </Menu>
 
           {/* Settings Icon to open side menu */}
           <IconButton

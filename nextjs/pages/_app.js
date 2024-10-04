@@ -47,7 +47,7 @@ export default function App({ Component, pageProps: { session, ...pageProps }, p
       </Head>
 
       {/* Wrap the application in SessionProvider */}
-      <SessionProvider session={session}>   
+      <SessionProvider session={session}>  
         <AppCacheProvider {...props}>
           <ThemeProvider theme={theme}>
             <Layout>
