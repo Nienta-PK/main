@@ -79,7 +79,7 @@ export default function Layout({ children }) {
   }, [customCursorEnabled]);
 
   const noNavPages = ['/', '/login', '/register'];
-  const noFooterPages = ['/login', '/register'];
+  const noFooterPages = ['/','/login', '/register'];
 
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>

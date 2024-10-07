@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, JSON, Interval, Time, Text
+from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, Time, Text
 from utils.database import Base
 import datetime
 from sqlalchemy.orm import relationship
@@ -48,12 +48,20 @@ class Category(Base):
     tasks = relationship("Task", back_populates="category")
 
 
-class Tag(Base):
-    __tablename__ = 'tags'
-    tag_id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False, unique=True)
-    
-    task_tags = relationship("TaskTag", back_populates="tag")
+class Priority(Base):
+    __tablename__ = 'priorities'
+    priority_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)  # e.g., Urgent, High Priority, Low Priority
+
+    tasks = relationship("Task", back_populates="priority")
+
+
+class Status(Base):
+    __tablename__ = 'statuses'
+    status_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)  # e.g., Ongoing, Completed, Delay, Abandoned
+
+    tasks = relationship("Task", back_populates="status")
 
 
 class Task(Base):
@@ -64,15 +72,19 @@ class Task(Base):
     description = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.utcnow)
     due_date = Column(TIMESTAMP, nullable=True)
-    priority = Column(Integer, nullable=False, default=0)  # 0=Low, 1=Medium, 2=High
-    status = Column(String(50), nullable=False, default="pending")  # pending, in-progress, finished
     is_important = Column(Boolean, nullable=False, default=False)
     finished_date = Column(TIMESTAMP, nullable=True)  # Add finished date field
 
+    # Foreign Keys
+    category_id = Column(Integer, ForeignKey('categories.category_id'), nullable=True)
+    priority_id = Column(Integer, ForeignKey('priorities.priority_id'), nullable=False)
+    status_id = Column(Integer, ForeignKey('statuses.status_id'), nullable=False)
+
     # Relationships
     user = relationship("User", back_populates="tasks")
-    category_id = Column(Integer, ForeignKey('categories.category_id'), nullable=True)
     category = relationship("Category", back_populates="tasks")
+    priority = relationship("Priority", back_populates="tasks")
+    status = relationship("Status", back_populates="tasks")
     tags = relationship("TaskTag", back_populates="task")
 
 
@@ -83,3 +95,11 @@ class TaskTag(Base):
     
     task = relationship("Task", back_populates="tags")
     tag = relationship("Tag", back_populates="task_tags")
+
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    tag_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)
+    
+    task_tags = relationship("TaskTag", back_populates="tag")

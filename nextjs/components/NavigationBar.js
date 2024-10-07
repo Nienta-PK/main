@@ -205,9 +205,10 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
             onClose={handleMenuClose}
           >
             <MenuItem onClick={() => handleNavigation('/dashboard')}>Dashboard</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/all_task')}>Game History</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/important')}>Game History</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/calendar')}>Game History</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/all_task')}>All Task</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/important')}>Import Task</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/finished')}>Finished Task</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/calendar')}>Calendar</MenuItem>
           </Menu>
 
           {/* Settings Icon to open side menu */}
