@@ -40,14 +40,20 @@ const darkTheme = createTheme({
 
 export default function Layout({ children }) {
   const [darkMode, setDarkMode] = useState(false);
-  const [customCursorEnabled, setCustomCursorEnabled] = useState(true); // State to toggle custom cursor
+  const [customCursorEnabled, setCustomCursorEnabled] = useState(false); // Initially disabled
   const router = useRouter();
 
-  // Load theme preference from localStorage
+  // Load theme and cursor preference from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
+    const savedCursorState = localStorage.getItem('customCursorEnabled');
+
     if (savedTheme === 'dark') {
       setDarkMode(true);
+    }
+
+    if (savedCursorState === 'true') {
+      setCustomCursorEnabled(true);
     }
   }, []);
 
@@ -58,7 +64,9 @@ export default function Layout({ children }) {
   };
 
   const toggleCustomCursor = () => {
-    setCustomCursorEnabled((prev) => !prev); // Toggle custom cursor state
+    const newCursorState = !customCursorEnabled;
+    setCustomCursorEnabled(newCursorState);
+    localStorage.setItem('customCursorEnabled', newCursorState ? 'true' : 'false');
   };
 
   // Apply/remove customCursorEnabled class to hide system cursor when needed

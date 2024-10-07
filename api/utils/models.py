@@ -1,9 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, JSON, Interval,Time
-from utils.database import Base
-import datetime
-from sqlalchemy.orm import relationship
-
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, Interval, Time
+from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, JSON, Interval, Time, Text
 from utils.database import Base
 import datetime
 from sqlalchemy.orm import relationship
@@ -19,7 +14,7 @@ class User(Base):
     is_admin = Column(Boolean, nullable=False, default=False)
     
     login_history = relationship("Login_History", back_populates="user")
-    play_history = relationship("Play_History", back_populates="user")
+    tasks = relationship("Task", back_populates="user")
 
 
 class Login_History(Base):
@@ -36,19 +31,6 @@ class Login_History(Base):
     weekday = relationship("Weekday", back_populates="login_histories")
 
 
-class Play_History(Base):
-    __tablename__ = 'play_history'
-    play_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    timestamp = Column(TIMESTAMP, default=datetime.datetime.utcnow)
-    time_to_finish = Column(Interval)
-    mode = Column(String(10), nullable=False)  # e.g., 'easy', 'medium', 'hard'
-    number_of_mistakes = Column(Integer)
-    status = Column(String(50))  # e.g., completed, abandoned
-    
-    user = relationship("User", back_populates="play_history")
-
-
 class Weekday(Base):
     __tablename__ = 'weekday'
     weekday_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -56,17 +38,48 @@ class Weekday(Base):
     
     login_histories = relationship("Login_History", back_populates="weekday")
 
-"""
-class Ranking(Base):
-    __tablename__ = 'ranking'
-    rank_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    score = Column(Integer)
-    rank_position = Column(Integer)
 
-class Resume_Table(Base):
-    __tablename__ = 'resume_table'
-    resume_id = Column(Integer, primary_key=True, autoincrement=True)
+class Category(Base):
+    __tablename__ = 'categories'
+    category_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=True)
+    
+    tasks = relationship("Task", back_populates="category")
+
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    tag_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)
+    
+    task_tags = relationship("TaskTag", back_populates="tag")
+
+
+class Task(Base):
+    __tablename__ = 'tasks'
+    task_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    game_state = Column(JSON)  # To store the current state of the Sudoku board
-    created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.utcnow)"""
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.utcnow)
+    due_date = Column(TIMESTAMP, nullable=True)
+    priority = Column(Integer, nullable=False, default=0)  # 0=Low, 1=Medium, 2=High
+    status = Column(String(50), nullable=False, default="pending")  # pending, in-progress, finished
+    is_important = Column(Boolean, nullable=False, default=False)
+    finished_date = Column(TIMESTAMP, nullable=True)  # Add finished date field
+
+    # Relationships
+    user = relationship("User", back_populates="tasks")
+    category_id = Column(Integer, ForeignKey('categories.category_id'), nullable=True)
+    category = relationship("Category", back_populates="tasks")
+    tags = relationship("TaskTag", back_populates="task")
+
+
+class TaskTag(Base):
+    __tablename__ = 'task_tags'
+    task_id = Column(Integer, ForeignKey('tasks.task_id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.tag_id'), primary_key=True)
+    
+    task = relationship("Task", back_populates="tags")
+    tag = relationship("Tag", back_populates="task_tags")

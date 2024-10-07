@@ -182,7 +182,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
               fontFamily: 'Prompt',
             }}
           >
-            RAI Sudoku
+            My Task Manager
           </Typography>
 
           <div style={{ flexGrow: 1 }} />
@@ -205,8 +205,9 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
             onClose={handleMenuClose}
           >
             <MenuItem onClick={() => handleNavigation('/dashboard')}>Dashboard</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/ranking')}>Ranking</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/play-history')}>Game History</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/all_task')}>Game History</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/important')}>Game History</MenuItem>
+            <MenuItem onClick={() => handleNavigation('/calendar')}>Game History</MenuItem>
           </Menu>
 
           {/* Settings Icon to open side menu */}
