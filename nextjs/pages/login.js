@@ -26,7 +26,7 @@ export default function Login() {
       const { access_token, user_id, is_admin } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('user_id', user_id);
-      localStorage.setItem('is_admin', user_id);
+      localStorage.setItem('is_admin', is_admin);
       window.location.href = "/home";
     } catch (err) {
       const errorResponse = err.response?.data;

@@ -136,7 +136,7 @@ async def update_user(
     db.refresh(db_user)
 
     # Generate a new access token after the update
-    access_token = create_access_token(data={"sub": db_user.username})
+    access_token = create_access_token(data={"sub": db_user.email})
 
     # Return the updated user data along with the new access token
     return UserUpdateResponse(

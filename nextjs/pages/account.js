@@ -92,6 +92,7 @@ const Account = () => {
         setEditMode((prev) => ({ ...prev, [field]: false }));
         setSnackbar({ open: true, message: `${field.charAt(0).toUpperCase() + field.slice(1)} Updated`, severity: 'success' });
         fetchUserData();
+        
     } catch (error) {
         const errorMessage = 
             error.response?.data?.message ||
