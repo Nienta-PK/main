@@ -18,7 +18,7 @@ ALGORITHM = os.getenv('AUTH_ALGORITHM')
 
 # ---------------- Pydantic models ------------------ #
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 class AuthUser(BaseModel):
     user_id: Optional[int] = None
@@ -46,7 +46,7 @@ jwt_bearer = JWTBearer()
 
 # -------------------- Get Current User ---------------------- #
 async def get_current_user(
-    token: Annotated[str, Depends(jwt_bearer)],
+    token: Annotated[str, Depends(jwt_bearer)],  # Ensure jwt_bearer extracts the token
     db: db_dependency
 ) -> AuthUser:
     credentials_exception = HTTPException(
@@ -54,22 +54,24 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
     try:
         # Decode the JWT token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")  # Extract the 'sub' claim from the payload
-        if username is None:
+        email: str = payload.get("sub")  # Extract the 'sub' claim from the payload (now contains email)
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(email=email)
     except JWTError as e:
         print(f"JWTError: {e}")  # Debugging log
         raise credentials_exception
 
-    # Retrieve the user from the database based on the username
-    user = db.query(UserModel).filter(UserModel.username == token_data.username).first()
+    # Retrieve the user from the database based on the email
+    user = db.query(UserModel).filter(UserModel.email == token_data.email).first()
     if user is None:
         raise credentials_exception
 
+    # Return the AuthUser schema
     return AuthUser(
         user_id=user.user_id,
         username=user.username,

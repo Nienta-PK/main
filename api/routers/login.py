@@ -34,16 +34,17 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user_id: int  # Add user_id to the response model
+    is_admin: bool
 
 # Helper Functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_user(db: Session, username: str) -> Optional[UserModel]:
-    return db.query(UserModel).filter(UserModel.username == username).first()
+def get_user_by_email(db: Session, email: str) -> Optional[UserModel]:
+    return db.query(UserModel).filter(UserModel.email == email).first()
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[UserModel]:
-    user = get_user(db, username)
+def authenticate_user(db: Session, email: str, password: str) -> Optional[UserModel]:
+    user = get_user_by_email(db, email)
     if not user or not verify_password(password, user.password):
         return None
     return user
@@ -64,11 +65,11 @@ async def login_for_access_token(
     db: db_dependency,
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    user = authenticate_user(db, form_data.username, form_data.password)
+    user = authenticate_user(db, form_data.username, form_data.password)  # Using form_data.username for email
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",  # Updated error message to reference email
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -91,8 +92,10 @@ async def login_for_access_token(
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.email},  # Using email in token payload
+        expires_delta=access_token_expires
     )
 
     # Return token, user_id, and token type
-    return {"access_token": access_token, "token_type": "bearer", "user_id": user.user_id}
+    return {"access_token": access_token, "token_type": "bearer", "user_id": user.user_id, "is_admin": user.is_admin}
+

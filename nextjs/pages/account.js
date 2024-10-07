@@ -41,6 +41,14 @@ const Account = () => {
 
         setUserData(response.data);
     } catch (error) {
+        // Log the full error object to see everything
+        console.error('Error fetching user data:', error);
+
+        // Log individual parts of the error for detailed inspection
+        console.error('Error Message:', error.message);
+        console.error('Error Response:', error.response);
+        console.error('Error Status:', error.response?.status);
+        console.error('Error Data:', error.response?.data);
         const errorMessage = 
             error.response?.data?.message ||
             error.response?.data?.detail ||

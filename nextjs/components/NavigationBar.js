@@ -17,8 +17,6 @@ import {
   AccordionDetails,
   Switch,
   Fade,
-  Menu,
-  MenuItem,  // Import Menu and MenuItem
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/router';
@@ -30,10 +28,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import CloseIcon from '@mui/icons-material/Close';
+import GridOnIcon from '@mui/icons-material/GridOn';
 import useBearStore from '@/store/useBearStore';
 import { signOut } from 'next-auth/react';
-import GridOnIcon from '@mui/icons-material/GridOn';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; // Import icon for dropdown
 
 const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCustomCursor }) => {
   const router = useRouter();
@@ -42,39 +39,21 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
   // State to control the drawer
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  // State to control the page navigation menu
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleNavigation = (path) => {
-    setAnchorEl(null);
-    router.push(path);  // Navigate to the selected path
+    setDrawerOpen(false);
+    router.push(path); // Navigate to the selected path
   };
 
-  // Function to toggle the drawer state
-  const toggleDrawer = (open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
+  const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
 
-  // Drawer content with header
   const drawerContent = (
     <Box
       sx={{ width: 250 }}
       role="presentation"
       onKeyDown={toggleDrawer(false)}
     >
-      {/* Header with Settings text and close button */}
       <Box
         sx={{
           display: 'flex',
@@ -90,7 +69,6 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
       </Box>
       <Divider />
 
-      {/* List of menu items */}
       <List>
         <ListItem button onClick={() => handleNavigation('/account')}>
           <ListItemIcon>
@@ -106,17 +84,46 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
         </ListItem>
         <Divider />
 
-        {/* Accordion to group theme and cursor toggles */}
+        {/* Pages Accordion */}
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
+            <Typography>Pages</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List>
+              <ListItem button onClick={() => handleNavigation('/dashboard')}>
+                <ListItemText primary="Dashboard" />
+              </ListItem>
+              <ListItem button onClick={() => handleNavigation('/all_task')}>
+                <ListItemText primary="All Task" />
+              </ListItem>
+              <ListItem button onClick={() => handleNavigation('/important')}>
+                <ListItemText primary="Important Task" />
+              </ListItem>
+              <ListItem button onClick={() => handleNavigation('/finished')}>
+                <ListItemText primary="Finished Task" />
+              </ListItem>
+              <ListItem button onClick={() => handleNavigation('/calendar')}>
+                <ListItemText primary="Calendar" />
+              </ListItem>
+            </List>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Accordion for Display Settings */}
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel2a-content"
+            id="panel2a-header"
+          >
             <Typography>Display Settings</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            {/* Toggle Custom Cursor Switch */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography>Custom Cursor</Typography>
               <Switch
@@ -125,21 +132,15 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
                 color="primary"
               />
             </Box>
-            {/* Toggle Theme Switch */}
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              {/* Box for Typography and Icon together */}
               <Box display="flex" alignItems="center">
                 <Typography>Dark Mode</Typography>
-
-                {/* Fade transition for changing icon */}
                 <Fade in={true} timeout={600}>
                   <IconButton edge="end" color="inherit">
                     {darkMode ? <Brightness4Icon /> : <Brightness7Icon />}
                   </IconButton>
                 </Fade>
               </Box>
-
-              {/* Switch for toggling the theme */}
               <Switch
                 checked={darkMode}
                 onChange={toggleTheme}
@@ -152,8 +153,11 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
         <ListItem
           button
           onClick={() => {
-            localStorage.removeItem('token');  // Clear the token from localStorage
-            signOut({ callbackUrl: '/login' });  // Sign out and redirect to login page
+            localStorage.removeItem('token');
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('is_admin');
+            localStorage.removeItem('email');
+            signOut({ callbackUrl: '/login' });
           }}
         >
           <ListItemIcon>
@@ -187,46 +191,15 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
 
           <div style={{ flexGrow: 1 }} />
 
-          {/* Page Navigation Drop-down Menu */}
-          <Button
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            onClick={handleMenuClick}
-            endIcon={<ArrowDropDownIcon />}
-            sx={{ color: 'white' }}
-          >
-            Pages
-          </Button>
-          <Menu
-            id="simple-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={open}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => handleNavigation('/dashboard')}>Dashboard</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/all_task')}>All Task</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/important')}>Import Task</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/finished')}>Finished Task</MenuItem>
-            <MenuItem onClick={() => handleNavigation('/calendar')}>Calendar</MenuItem>
-          </Menu>
-
-          {/* Settings Icon to open side menu */}
-          <IconButton
-            color="inherit"
-            onClick={toggleDrawer(true)}
-          >
+          {/* Settings Icon to open the drawer */}
+          <IconButton color="inherit" onClick={toggleDrawer(true)}>
             <SettingsIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Drawer component for side menu */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={toggleDrawer(false)}
-      >
+      {/* Drawer for Settings and Pages */}
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         {drawerContent}
       </Drawer>
     </>
@@ -234,4 +207,3 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
 };
 
 export default NavigationLayout;
-

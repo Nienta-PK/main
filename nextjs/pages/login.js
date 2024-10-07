@@ -11,20 +11,6 @@ export default function Login() {
   const [error, setError] = useState(null);
   const { data: session, status } = useSession(); // Access session data
 
-  // Store token and user_id in localStorage after Google Sign-In
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      const accessToken = session.accessToken; // Make sure accessToken is available in session
-      const userId = session.user?.id; // Ensure `user.id` is available in session data
-
-      if (accessToken && userId) {
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('user_id', user_id);
-        window.location.href = '/home'; // Redirect after storing data
-      }
-    }
-  }, [session, status]);
-
   const handleManualLogin = async (e) => {
     e.preventDefault();
 
@@ -37,9 +23,10 @@ export default function Login() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      const { access_token, user_id } = response.data;
+      const { access_token, user_id, is_admin } = response.data;
       localStorage.setItem('token', access_token);
       localStorage.setItem('user_id', user_id);
+      localStorage.setItem('is_admin', user_id);
       window.location.href = "/home";
     } catch (err) {
       const errorResponse = err.response?.data;
