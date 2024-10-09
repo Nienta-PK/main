@@ -1,0 +1,147 @@
+/* CSS for the UsersTable component */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #282c34;  /* Default dark background */
+  }
+  
+  .box {
+    width: 100%;
+    max-width: 900px;
+    background-color: #1e1e1e;  /* Dark inner box background */
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 2rem;
+    color: #f9f9f9;  /* Light text color */
+    margin-bottom: 20px;
+  }
+  
+  .searchForm {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .searchInput {
+    padding: 10px;
+    border: 1px solid #555;
+    background-color: #333;
+    border-radius: 4px;
+    color: #f9f9f9;
+    width: 300px;
+    margin-right: 10px;
+    font-size: 1rem;
+  }
+  
+  .searchButton {
+    padding: 10px 20px;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .searchButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .sortingOptions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .label {
+    margin-right: 10px;
+    font-size: 1rem;
+    color: #f9f9f9;
+  }
+  
+  .dropdown {
+    padding: 10px;
+    background-color: #333;
+    color: #f9f9f9;
+    border: 1px solid #555;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-right: 10px;
+  }
+  
+  .sortButton {
+    padding: 10px 20px;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .sortButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .userTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    color: #f9f9f9;
+  }
+  
+  .userTable th, .userTable td {
+    padding: 12px;
+    border: 1px solid #555;
+    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .userTable th {
+    background-color: #333;
+    font-weight: bold;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #f9f9f9;
+  }
+  
+  .error {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #ff4c4c;
+  }
+  
+  .noUsers {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #f9f9f9;
+  }
+
+.showAllButton {
+  padding: 10px 20px;
+  background-color: #ff9800; /* Unique color */
+  color: #fff;
+  border: 2px solid #ff9800; /* Unique border */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 10px; /* Space between Search and Show All */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.showAllButton:hover {
+  background-color: transparent;
+  color: #ff9800; /* Unique hover color */
+  border-color: #ff9800;
+}

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from routers import crud, auth, register, login, route_protector, login_history, user_by_email
+from routers_algo import all_user_data
 from fastapi.middleware.cors import CORSMiddleware
 from utils.database import engine, Base,SessionLocal 
 from fastapi.openapi.utils import get_openapi
@@ -63,3 +64,6 @@ app.include_router(login.router)
 app.include_router(route_protector.router)
 app.include_router(login_history.router)
 app.include_router(user_by_email.router)
+
+#algo_router
+app.include_router(all_user_data.router)
