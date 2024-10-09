@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';  // Import the Delete icon from Material-UI
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from '@mui/material';  // Import MUI Dialog components
 import styles from '../styles/UserTable.module.css';  // Import the CSS module
 
 export default function UsersTable() {
@@ -9,6 +18,8 @@ export default function UsersTable() {
   const [error, setError] = useState(null); // Handle error state
   const [sortingStatus, setSortingStatus] = useState('user_id'); // Sorting status
   const [reverseStatus, setReverseStatus] = useState(false); // Reverse sorting status
+  const [userToDelete, setUserToDelete] = useState(null);  // Store user_id of the user to delete
+  const [openDialog, setOpenDialog] = useState(false);  // Control the display of the MUI Dialog
 
   // Function to fetch users based on username, with sorting and reverse status
   const fetchUsers = async (username = '') => {
@@ -54,6 +65,31 @@ export default function UsersTable() {
     fetchUsers();  // Fetch all users without filters
   };
 
+  // Open the dialog to confirm deletion
+  const handleDeleteClick = (userId) => {
+    setUserToDelete(userId);  // Set the user_id of the user to be deleted
+    setOpenDialog(true);  // Show the confirmation dialog
+  };
+
+  // Handle user deletion after confirmation
+  const deleteUser = async () => {
+    if (userToDelete) {
+      try {
+        await axios.delete(`http://localhost:8000/algo/delete_user/${userToDelete}`);
+        setUsers(users.filter(user => user.user_id !== userToDelete));  // Update the user list
+        setOpenDialog(false);  // Close the dialog
+      } catch (err) {
+        console.error("Failed to delete user:", err);
+        setOpenDialog(false);
+      }
+    }
+  };
+
+  // Close the dialog without deletion
+  const handleClose = () => {
+    setOpenDialog(false);  // Close the dialog without deleting
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.box}>
@@ -69,8 +105,6 @@ export default function UsersTable() {
             className={styles.searchInput}
           />
           <button type="submit" className={styles.searchButton}>Search</button>
-
-          {/* Show All button placed after Search button */}
           <button type="button" onClick={showAll} className={styles.showAllButton}>Show All</button>
         </form>
 
@@ -105,6 +139,7 @@ export default function UsersTable() {
                 <th>Is Active</th>
                 <th>Is Admin</th>
                 <th>Create Date</th>
+                <th>Action</th> {/* New column for action */}
               </tr>
             </thead>
             <tbody>
@@ -116,6 +151,12 @@ export default function UsersTable() {
                   <td>{user.is_active ? 'Yes' : 'No'}</td>
                   <td>{user.is_admin ? 'Yes' : 'No'}</td>
                   <td>{user.create_date}</td>
+                  <td>
+                    <DeleteForeverIcon 
+                      className={styles.removeIcon} 
+                      onClick={() => handleDeleteClick(user.user_id)} 
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -123,6 +164,29 @@ export default function UsersTable() {
         ) : (
           !loading && !error && <p className={styles.noUsers}>No users found.</p>
         )}
+
+        {/* MUI Dialog for confirming deletion */}
+        <Dialog
+          open={openDialog}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete this user? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={deleteUser} color="error" autoFocus>
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

@@ -86,3 +86,40 @@ def get_users(
 
     # If id is 0 or no match is found, return all sorted users
     return users_dict
+
+#----------------- Delete ------------------------#
+
+# Linear search function to find a user by user_id
+def search_by_user_id(users_dict, user_id):
+    for user in users_dict:
+        if user['user_id'] == user_id:
+            return user
+    return None
+
+# Delete user endpoint using linear search
+@router.delete("/delete_user/{user_id}")
+def delete_user(user_id: int, db: db_dependency):
+    # Fetch all users from the database
+    users = db.query(User).all()
+    users_dict = [user.__dict__ for user in users]
+
+    # Remove SQLAlchemy session-specific keys, such as '_sa_instance_state'
+    """  for user in users_dict:
+            user.pop('_sa_instance_state', None)"""
+
+    # Use linear search to find the user by user_id
+    found_user = search_by_user_id(users_dict, user_id)
+
+    if not found_user:
+        # Raise an error if the user does not exist
+        raise HTTPException(status_code=404, detail=f"User with user_id '{user_id}' not found")
+
+    # Fetch the actual user object using user_id to delete it from the database
+    user_to_delete = db.query(User).filter(User.user_id == user_id).first()
+
+    if user_to_delete:
+        db.delete(user_to_delete)  # Delete the user
+        db.commit()  # Commit the transaction
+
+    # Return a success message
+    return {"message": f"User with user_id '{user_id}' has been deleted successfully"}
