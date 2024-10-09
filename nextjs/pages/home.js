@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import withAuth from '@/hoc/withAuth';
 
 function Home() {
   const { data: session, status } = useSession();
@@ -46,5 +47,5 @@ function Home() {
   );
 }
 
-export default Home;
+export default withAuth(Home);
 

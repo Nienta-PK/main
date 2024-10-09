@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/router';  // Import the useRouter hook from Next.js
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';  // Import the Delete icon from Material-UI
 import {
   Dialog,
@@ -20,6 +21,18 @@ export default function UsersTable() {
   const [reverseStatus, setReverseStatus] = useState(false); // Reverse sorting status
   const [userToDelete, setUserToDelete] = useState(null);  // Store user_id of the user to delete
   const [openDialog, setOpenDialog] = useState(false);  // Control the display of the MUI Dialog
+
+  const router = useRouter();  // Initialize useRouter to handle redirects
+
+  // Check if the user is an admin
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('is_admin');
+
+    // If not an admin, redirect to /home
+    if (isAdmin === 'false'|| !isAdmin) {
+      router.push('/home');  // Redirect to the /home page
+    }
+  }, []);
 
   // Function to fetch users based on username, with sorting and reverse status
   const fetchUsers = async (username = '') => {
@@ -93,7 +106,7 @@ export default function UsersTable() {
   return (
     <div className={styles.container}>
       <div className={styles.box}>
-        <h1 className={styles.title}>User Search & Sorting</h1>
+        <h1 className={styles.title}>User Management</h1>
 
         {/* Search bar */}
         <form onSubmit={handleSearch} className={styles.searchForm}>
@@ -191,3 +204,4 @@ export default function UsersTable() {
     </div>
   );
 }
+
