@@ -86,3 +86,18 @@ class Task(Base):
     priority = relationship("Priority", back_populates="tasks")
     status = relationship("Status", back_populates="tasks")
     tags = relationship("TaskTag", back_populates="task")
+
+class TaskTag(Base):
+    __tablename__ = 'task_tags'
+    task_id = Column(Integer, ForeignKey('tasks.task_id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.tag_id'), primary_key=True)
+    
+    task = relationship("Task", back_populates="tags")
+    tag = relationship("Tag", back_populates="task_tags")
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    tag_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False, unique=True)
+    
+    task_tags = relationship("TaskTag", back_populates="tag")

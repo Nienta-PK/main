@@ -1,12 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import { CircularProgress, Button, Typography, Grid, Card, CardContent, Box } from '@mui/material';
 import withAuth from '@/hoc/withAuth';
 
 function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  const [tasks, setTasks] = useState([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [errorTasks, setErrorTasks] = useState(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -36,160 +41,77 @@ function Home() {
     fetchUserInfo();
   }, [status, session, router]);
 
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (status === 'authenticated') {
+        try {
+          const res = await fetch('http://localhost:8000/tasks');
+          if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+          }
+          const data = await res.json();
+          setTasks(data);
+        } catch (error) {
+          setErrorTasks(error.message);
+        } finally {
+          setLoadingTasks(false);
+        }
+      }
+    };
+
+    fetchTasks();
+  }, [status]);
+
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
   return (
-    <div>
-      <h1>Home Page</h1>
-    </div>
+    <Box
+      sx={{
+        padding: '20px',
+        width: '100%',
+        height: '100vh',
+        margin: '0',
+        textAlign: 'center',
+        backgroundColor: 'background.default',
+      }}
+    >
+      <Typography variant="h2" gutterBottom>Welcome to the Daily Task Manager</Typography>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
+        <Button variant="contained" color="primary" onClick={() => router.push('/tasks/create')}>Add New Task</Button>
+        <Button variant="outlined" color="primary" onClick={() => router.push('/tasks/all')}>View All Tasks</Button>
+      </div>
+
+      <Typography variant="h4" gutterBottom>Your Recent Tasks</Typography>
+
+      {loadingTasks ? (
+        <CircularProgress />
+      ) : errorTasks ? (
+        <Typography color="error" variant="body1">{errorTasks}</Typography>
+      ) : (
+        <Grid container spacing={2}>
+          {tasks.length > 0 ? (
+            tasks.slice(0, 5).map((task) => (
+              <Grid item key={task.id} xs={12} sm={6} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5">{task.title}</Typography>
+                    <Typography variant="body2">
+                      {task.is_completed ? 'Completed' : 'Pending'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Typography variant="body1">No tasks available</Typography>
+          )}
+        </Grid>
+      )}
+    </Box>
   );
 }
 
 export default withAuth(Home);
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router'; // Import useRouter for navigation
-import { CircularProgress } from '@mui/material';
-
-export default function Home() {  // Changed component name from Nah to Home
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const router = useRouter(); // Initialize router for navigation
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/tasks');
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-      const data = await res.json();
-      setTasks(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to navigate to the task creation page
-  const handleAddTask = () => {
-    router.push('/tasks/create'); // Navigate to the task creation page
-  };
-
-  // Function to navigate to the all tasks page
-  const handleViewAllTasks = () => {
-    router.push('/tasks/all'); // Navigate to the all tasks page
-  };
-
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Welcome to the Daily Task Manager</h1>
-
-      <div style={styles.actions}>
-        <button style={styles.button} onClick={handleAddTask}>Add New Task</button>
-        <button style={styles.buttonOutline} onClick={handleViewAllTasks}>View All Tasks</button>
-      </div>
-
-      <h2 style={styles.subtitle}>Your Recent Tasks</h2>
-
-      {loading ? (
-        <CircularProgress />
-      ) : error ? (
-        <p style={styles.errorText}>{error}</p>
-      ) : (
-        <div style={styles.taskGrid}>
-          {tasks.length > 0 ? (
-            tasks.slice(0, 5).map((task) => (
-              <div key={task.id} style={styles.taskCard}>
-                <h3 style={styles.taskTitle}>{task.title}</h3>
-                <p style={styles.taskStatus}>
-                  {task.is_completed ? 'Completed' : 'Pending'}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p>No tasks available</p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const styles = {
-  container: {
-    padding: '20px',
-    maxWidth: '1000px',
-    margin: '0 auto',
-    textAlign: 'center',
-    fontFamily: 'Arial, sans-serif',
-  },
-  title: {
-    fontSize: '2.5rem',
-    marginBottom: '20px',
-    color: '#333',
-  },
-  actions: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '20px',
-    marginBottom: '30px',
-  },
-  button: {
-    padding: '12px 20px',
-    backgroundColor: '#0070f3',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-  },
-  buttonOutline: {
-    padding: '12px 20px',
-    backgroundColor: '#fff',
-    color: '#0070f3',
-    border: '2px solid #0070f3',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-  },
-  subtitle: {
-    fontSize: '1.8rem',
-    marginBottom: '20px',
-    color: '#555',
-  },
-  taskGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '20px',
-  },
-  taskCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-    padding: '15px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    textAlign: 'left',
-  },
-  taskTitle: {
-    fontSize: '1.25rem',
-    fontWeight: 'bold',
-    marginBottom: '10px',
-  },
-  taskStatus: {
-    fontSize: '1rem',
-  },
-  errorText: {
-    color: 'red',
-    fontWeight: 'bold',
-  },
-};
