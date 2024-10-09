@@ -13,7 +13,7 @@ class User(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     is_admin = Column(Boolean, nullable=False, default=False)
     
-    login_history = relationship("Login_History", back_populates="user")
+    login_history = relationship("Login_History", back_populates="user", cascade="all, delete-orphan")
     tasks = relationship("Task", back_populates="user")
 
 
