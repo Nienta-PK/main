@@ -4,6 +4,7 @@ import {
   Toolbar,
   Typography,
   Button,
+  TextField,
   IconButton,
   Drawer,
   List,
@@ -21,6 +22,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import FunctionsIcon from '@mui/icons-material/Functions';
 import PersonIcon from '@mui/icons-material/Person';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -49,11 +51,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
   };
 
   const drawerContent = (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onKeyDown={toggleDrawer(false)}
-    >
+    <Box sx={{ width: 250 }} role="presentation" onKeyDown={toggleDrawer(false)}>
       <Box
         sx={{
           display: 'flex',
@@ -86,11 +84,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
 
         {/* Pages Accordion */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
             <Typography>Pages</Typography>
           </AccordionSummary>
           <AccordionDetails>
@@ -98,14 +92,11 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
               <ListItem button onClick={() => handleNavigation('/dashboard')}>
                 <ListItemText primary="Dashboard" />
               </ListItem>
-              <ListItem button onClick={() => handleNavigation('/all_task')}>
+              <ListItem button onClick={() => handleNavigation('/tasks/all')}>
                 <ListItemText primary="All Task" />
               </ListItem>
-              <ListItem button onClick={() => handleNavigation('/important')}>
-                <ListItemText primary="Important Task" />
-              </ListItem>
-              <ListItem button onClick={() => handleNavigation('/finished')}>
-                <ListItemText primary="Finished Task" />
+              <ListItem button onClick={() => handleNavigation('/tasks/create')}>
+                <ListItemText primary="Create Task" />
               </ListItem>
               <ListItem button onClick={() => handleNavigation('/calendar')}>
                 <ListItemText primary="Calendar" />
@@ -116,21 +107,13 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
 
         {/* Accordion for Display Settings */}
         <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2a-content"
-            id="panel2a-header"
-          >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
             <Typography>Display Settings</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography>Custom Cursor</Typography>
-              <Switch
-                checked={customCursorEnabled}
-                onChange={toggleCustomCursor}
-                color="primary"
-              />
+              <Switch checked={customCursorEnabled} onChange={toggleCustomCursor} color="primary" />
             </Box>
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box display="flex" alignItems="center">
@@ -141,11 +124,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
                   </IconButton>
                 </Fade>
               </Box>
-              <Switch
-                checked={darkMode}
-                onChange={toggleTheme}
-                color="primary"
-              />
+              <Switch checked={darkMode} onChange={toggleTheme} color="primary" />
             </Box>
           </AccordionDetails>
         </Accordion>
@@ -173,9 +152,12 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
     <>
       <AppBar position="sticky">
         <Toolbar>
-          <Link href={'/home'}>
+          {/* App Icon */}
+          <Link href="/home">
             <GridOnIcon sx={{ color: '#ffffff' }} fontSize="large" />
           </Link>
+
+          {/* App Name */}
           <Typography
             variant="body1"
             sx={{
@@ -186,13 +168,27 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
               fontFamily: 'Prompt',
             }}
           >
-            My Task Manager
+            {appName} {darkMode ? '(Dark Mode)' : '(Light Mode)'}
           </Typography>
+
+          {/* Navigation Links */}
+          <NavigationLink href="/home" label="Home" />
+          <NavigationLink href="/tasks/all" label="Tasks" />
 
           <div style={{ flexGrow: 1 }} />
 
+          {/* Create Task Button on the Right */}
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ marginLeft: '20px', backgroundColor: '#f50057' }}
+            onClick={() => router.push('/tasks/create')}
+          >
+            Create Task
+          </Button>
+
           {/* Settings Icon to open the drawer */}
-          <IconButton color="inherit" onClick={toggleDrawer(true)}>
+          <IconButton color="inherit" onClick={toggleDrawer(true)} sx={{ marginLeft: '10px' }}>
             <SettingsIcon />
           </IconButton>
         </Toolbar>
@@ -203,6 +199,24 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
         {drawerContent}
       </Drawer>
     </>
+  );
+};
+
+const NavigationLink = ({ href, label }) => {
+  return (
+    <Link href={href} style={{ textDecoration: 'none' }}>
+      <Typography
+        variant="body1"
+        sx={{
+          fontSize: '14px',
+          fontWeight: 500,
+          color: '#ffffff',
+          padding: '0 10px',
+        }}
+      >
+        {label}
+      </Typography>
+    </Link>
   );
 };
 

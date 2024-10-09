@@ -1,3 +1,4 @@
 *.pyc 
 .nodemodule
 .env.local
+node_modules

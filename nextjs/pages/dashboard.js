@@ -1,195 +1,196 @@
-// pages/dashboard.js
 import { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Grid, Paper, useTheme } from '@mui/material';
-import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
-} from 'recharts';
+import { Container, Grid, Paper, Typography, Box, Button, Tooltip } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import TaskIcon from '@mui/icons-material/Task';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error'; // New icon for missing tasks
 
-const DashboardPage = () => {
-  const [playHistory, setPlayHistory] = useState([]);
-  const [loginHistory, setLoginHistory] = useState([]);
-  const [loadingPlay, setLoadingPlay] = useState(true);
-  const [loadingLogin, setLoadingLogin] = useState(true);
-  const theme = useTheme(); // Access Material-UI theme
+// Mock API call function for stats and recent tasks
+const fetchDashboardData = async () => {
+  return {
+    stats: {
+      totalTasks: 450,
+      completedTasks: 320,
+    },
+    recentTasks: [
+      { id: 1, title: "Complete Project Proposal", is_completed: true },
+      { id: 2, title: "Design Wireframe", is_completed: false },
+      { id: 3, title: "Team Meeting", is_completed: true },
+    ],
+  };
+};
+
+export default function Dashboard() {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   useEffect(() => {
-    const user_id = localStorage.getItem('user_id');
-    if (!user_id) {
-      console.error('User ID not found in localStorage');
-      setLoadingPlay(false);
-      setLoadingLogin(false);
-      return;
-    }
-
-    const fetchPlayHistory = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/data/play-history/user/${user_id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch play history data');
-        }
-        const data = await response.json();
-        setPlayHistory(data);
-      } catch (error) {
-        console.error('Error fetching play history:', error);
-      } finally {
-        setLoadingPlay(false);
-      }
+    const loadDashboardData = async () => {
+      const data = await fetchDashboardData();
+      setDashboardData(data);
+      setLoading(false);
     };
-
-    const fetchLoginHistory = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/data/login-history/user/${user_id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch login history data');
-        }
-        const data = await response.json();
-        setLoginHistory(data);
-      } catch (error) {
-        console.error('Error fetching login history:', error);
-      } finally {
-        setLoadingLogin(false);
-      }
-    };
-
-    fetchPlayHistory();
-    fetchLoginHistory();
+    loadDashboardData();
   }, []);
 
-  if (loadingPlay || loadingLogin) {
-    return <CircularProgress color="primary" />;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000); // Update time every second
+
+    // Clear the interval when component is unmounted
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
-  // Data Processing for Play History
-  const totalGames = playHistory.length;
-  const gamesByMode = playHistory.reduce((acc, curr) => {
-    acc[curr.mode] = (acc[curr.mode] || 0) + 1;
-    return acc;
-  }, {});
-
-  const gamesByStatus = playHistory.reduce((acc, curr) => {
-    acc[curr.status] = (acc[curr.status] || 0) + 1;
-    return acc;
-  }, {});
-
-  const avgMistakesByMode = playHistory.reduce((acc, curr) => {
-    acc[curr.mode] = acc[curr.mode] || { total: 0, count: 0 };
-    acc[curr.mode].total += curr.number_of_mistakes;
-    acc[curr.mode].count += 1;
-    return acc;
-  }, {});
-
-  const modeMistakes = Object.entries(avgMistakesByMode).map(([mode, data]) => ({
-    mode,
-    avgMistakes: (data.total / data.count).toFixed(2),
-  }));
-
-  // Data Processing for Login History by Weekday
-  const loginsByWeekday = loginHistory.reduce((acc, curr) => {
-    acc[curr.weekday] = (acc[curr.weekday] || 0) + 1;
-    return acc;
-  }, {});
-
-  const loginsByWeekdayArray = Object.entries(loginsByWeekday).map(([weekday, count]) => ({
-    weekday,
-    count,
-  }));
-
-  const colors = ['#39FF14', '#FFA500', '#FF073A'];
+  // Calculate missing tasks (total tasks - completed tasks)
+  const missingTasks = dashboardData.stats.totalTasks - dashboardData.stats.completedTasks;
 
   return (
-    <Box sx={{ padding: 3, backgroundColor: theme.palette.background.default, minHeight: '100vh' }}>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
+    <Container style={styles.container}>
+      <Box style={styles.header}>
+        <Typography variant="h4" gutterBottom>
+          Dashboard Overview
+        </Typography>
 
-      <Typography variant="h6" gutterBottom>
-        Total Games Played: {totalGames}
-      </Typography>
+        {/* Display current date and time with icons */}
+        <Box display="flex" alignItems="center" mt={2}>
+          <DateRangeIcon style={styles.icon} />
+          <Typography variant="h6" gutterBottom style={styles.date}>
+            {currentDateTime.toLocaleDateString()}
+          </Typography>
+          <AccessTimeIcon style={styles.icon} />
+          <Typography variant="h6" gutterBottom style={styles.time}>
+            {currentDateTime.toLocaleTimeString()}
+          </Typography>
+        </Box>
+      </Box>
 
-      <Grid container spacing={4}>
-        {/* Games by Mode (Pie Chart) */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ padding: 2, backgroundColor: theme.palette.background.default }}>
-            <Typography variant="h6" gutterBottom>
-              Games by Mode
+      <Grid container spacing={3}>
+        {/* Missing Tasks */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} style={styles.statCard}>
+            <Tooltip title="Number of tasks that are not completed">
+              <ErrorIcon style={styles.iconLarge} />
+            </Tooltip>
+            <Typography variant="h6" color="textSecondary">
+              Missing Tasks
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={Object.entries(gamesByMode).map(([name, value], index) => ({
-                    name, value, fill: colors[index]
-                  }))}
-                  dataKey="value" outerRadius={100}
-                >
-                  {Object.keys(gamesByMode).map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[index]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <Typography variant="h4">{missingTasks}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} style={styles.statCard}>
+            <Tooltip title="Total number of tasks created">
+              <TaskIcon style={styles.iconLarge} />
+            </Tooltip>
+            <Typography variant="h6" color="textSecondary">
+              Total Tasks
+            </Typography>
+            <Typography variant="h4">{dashboardData.stats.totalTasks}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={3} style={styles.statCard}>
+            <Tooltip title="Total number of completed tasks">
+              <CheckCircleIcon style={styles.iconLarge} />
+            </Tooltip>
+            <Typography variant="h6" color="textSecondary">
+              Completed Tasks
+            </Typography>
+            <Typography variant="h4">{dashboardData.stats.completedTasks}</Typography>
           </Paper>
         </Grid>
 
-        {/* Games by Status (Bar Chart) */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ padding: 2, backgroundColor: theme.palette.background.default }}>
+        {/* Recent Tasks */}
+        <Grid item xs={12}>
+          <Paper elevation={3} style={styles.paper}>
             <Typography variant="h6" gutterBottom>
-              Games by Status
+              Recent Tasks
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={Object.entries(gamesByStatus).map(([status, count]) => ({ status, count }))}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+            {dashboardData.recentTasks.length > 0 ? (
+              dashboardData.recentTasks.map((task) => (
+                <Typography key={task.id} variant="body1" style={styles.taskItem}>
+                  {task.title} - {task.is_completed ? 'Completed' : 'Pending'}
+                </Typography>
+              ))
+            ) : (
+              <Typography variant="body1">No recent tasks available.</Typography>
+            )}
           </Paper>
         </Grid>
 
-        {/* Mistakes by Mode (Bar Chart) */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ padding: 2, backgroundColor: theme.palette.background.default }}>
+        {/* Actions */}
+        <Grid item xs={12}>
+          <Paper elevation={3} style={styles.paper}>
             <Typography variant="h6" gutterBottom>
-              Average Mistakes by Mode
+              Actions
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={modeMistakes}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mode" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="avgMistakes" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-
-        {/* Login Frequency by Weekday (Bar Chart) */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ padding: 2, backgroundColor: theme.palette.background.default }}>
-            <Typography variant="h6" gutterBottom>
-              Login Frequency by Weekday
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={loginsByWeekdayArray}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="weekday" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#FF073A" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Box display="flex" justifyContent="space-between">
+              <Button variant="contained" color="primary" style={styles.button}>
+                Add New Task
+              </Button>
+              <Button variant="outlined" color="secondary" style={styles.button}>
+                View All Tasks
+              </Button>
+            </Box>
           </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
-};
+}
 
-export default DashboardPage;
+const styles = {
+  container: {
+    marginTop: '30px',
+    marginBottom: '30px',
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+  icon: {
+    marginRight: '8px',
+    color: '#3f51b5',
+  },
+  iconLarge: {
+    fontSize: '3rem',
+    marginBottom: '10px',
+    color: '#f44336', // Red color to indicate missing tasks
+  },
+  date: {
+    marginRight: '20px',
+  },
+  time: {
+    fontWeight: 'bold',
+  },
+  statCard: {
+    padding: '30px',
+    textAlign: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '10px',
+  },
+  paper: {
+    padding: '20px',
+    backgroundColor: '#fff',
+    textAlign: 'center',
+    borderRadius: '10px',
+  },
+  taskItem: {
+    padding: '5px 0',
+  },
+  button: {
+    padding: '10px 20px',
+  },
+};

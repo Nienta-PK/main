@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/CustomCursor.module.css'; // Import CSS
+import styles from '../styles/CustomCursor.module.css'; // Make sure the path is correct
 
 const CustomCursor = ({ useCustomCursor }) => {
-    const [position, setPosition] = useState(null); // For Nyan Cat cursor
-    const [splashes, setSplashes] = useState([]); // Track all active splashes
+    const [position, setPosition] = useState({ x: -100, y: -100 }); // Nyan Cat starts off-screen
+    const [splashes, setSplashes] = useState([]); // Track active splashes
 
     // Update Nyan Cat cursor position as the mouse moves
     const moveCursor = (e) => {
         setPosition({ x: e.clientX, y: e.clientY });
     };
 
-    // Handle mouse click to create a new splash effect at the clicked position
+    // Handle mouse click to create a new splash effect
     const handleMouseDown = (e) => {
         const clickX = e.clientX;
         const clickY = e.clientY;
 
-        // Generate 15 particles arranged in a circle
+        // Generate particles for the splash
         const numParticles = 15;
         const newParticles = Array.from({ length: numParticles }, (_, i) => {
             const angle = (i / numParticles) * 2 * Math.PI;
@@ -24,7 +24,7 @@ const CustomCursor = ({ useCustomCursor }) => {
             return { id: i, x: `${x}px`, y: `${y}px` };
         });
 
-        // Add a new splash to the list of splashes
+        // Add a new splash to the splashes array
         const newSplash = {
             id: Date.now(),
             position: { x: clickX, y: clickY },
@@ -33,7 +33,7 @@ const CustomCursor = ({ useCustomCursor }) => {
 
         setSplashes((prevSplashes) => [...prevSplashes, newSplash]);
 
-        // Remove this splash after the animation ends (1.5 seconds)
+        // Remove splash after 1.5s
         setTimeout(() => {
             setSplashes((prevSplashes) =>
                 prevSplashes.filter((splash) => splash.id !== newSplash.id)
@@ -41,7 +41,7 @@ const CustomCursor = ({ useCustomCursor }) => {
         }, 1500);
     };
 
-    // Add event listeners for mouse movement and click
+    // Add event listeners when custom cursor is enabled
     useEffect(() => {
         if (useCustomCursor) {
             window.addEventListener('mousemove', moveCursor);
@@ -51,22 +51,21 @@ const CustomCursor = ({ useCustomCursor }) => {
             window.removeEventListener('mousedown', handleMouseDown);
         }
 
+        // Clean up event listeners on unmount
         return () => {
             window.removeEventListener('mousemove', moveCursor);
             window.removeEventListener('mousedown', handleMouseDown);
         };
     }, [useCustomCursor]);
 
-    if (!useCustomCursor) {
-        // Don't render anything if custom cursor is disabled
-        return null;
-    }
+    // Don't render anything if custom cursor is disabled
+    if (!useCustomCursor) return null;
 
     return (
         <>
-            {/* Apply the cursorHidden class to hide the system cursor */}
-            <div className={useCustomCursor ? styles.cursorHidden : ''}>
-                {/* Nyan Cat Cursor follows the mouse */}
+            {/* Hide system cursor and display custom one */}
+            <div className={styles.cursorHidden}>
+                {/* Nyan Cat Cursor following mouse movement */}
                 {position && (
                     <div
                         className={styles.nyanCat}
@@ -74,7 +73,7 @@ const CustomCursor = ({ useCustomCursor }) => {
                     />
                 )}
 
-                {/* Render multiple splashes */}
+                {/* Render all active splash effects */}
                 {splashes.map((splash) => (
                     <div
                         key={splash.id}
@@ -85,8 +84,8 @@ const CustomCursor = ({ useCustomCursor }) => {
                             <div
                                 key={particle.id}
                                 style={{
-                                    '--x': particle.x, // X movement for particle
-                                    '--y': particle.y, // Y movement for particle
+                                    '--x': particle.x,
+                                    '--y': particle.y,
                                 }}
                             />
                         ))}
