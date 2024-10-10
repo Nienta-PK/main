@@ -15,9 +15,14 @@ function Home() {
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [errorTasks, setErrorTasks] = useState(null);
 
+  // Check if there is a manually stored token in localStorage
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+  // Fetch user info either from session or from manually stored token
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (status === 'authenticated' && session?.user?.email) {
+        // Session-based authentication
         try {
           const response = await axios.get(`http://localhost:8000/auth/get-user-info/${session.user.email}`);
           const { access_token, user_id, is_admin } = response.data;
@@ -35,41 +40,57 @@ function Home() {
             console.error('Failed to fetch user info:', error);
           }
         }
+      } else if (token) {
+        console.log('Token already exists, skipping user info fetch.');
       }
     };
 
-    fetchUserInfo();
-  }, [status, session, router]);
+    // Trigger fetchUserInfo based on session or token
+    if (status === 'authenticated' || token) {
+      fetchUserInfo();
+    }
+  }, [status, session, router, token]);
 
+  // Fetch grouped tasks using either session or manual login
   useEffect(() => {
     const fetchGroupedTasks = async () => {
-      if (status === 'authenticated') {
-        try {
-          const response = await axios.get('http://localhost:8000/tasks/grouped');
-          const data = response.data;
+      setLoadingTasks(true);  // Show loading state while fetching
 
-          const oneDayTasks = data.oneday_left.map(task => ({
-            ...task,
-            due_date: new Date(task.due_date),
-          }));
+      try {
+        const response = await axios.get('http://localhost:8000/tasks/grouped', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        console.log("API response data:", response.data); // Log the response
 
-          const oneWeekTasks = data.oneweek_left.map(task => ({
-            ...task,
-            due_date: new Date(task.due_date),
-          }));
+        const data = response.data;
 
-          setOneDayLeftTasks(oneDayTasks);
-          setOneWeekLeftTasks(oneWeekTasks);
-        } catch (error) {
-          setErrorTasks(error.message);
-        } finally {
-          setLoadingTasks(false);
-        }
+        const oneDayTasks = data.oneday_left.map(task => ({
+          ...task,
+          due_date: new Date(task.due_date),
+        }));
+
+        const oneWeekTasks = data.oneweek_left.map(task => ({
+          ...task,
+          due_date: new Date(task.due_date),
+        }));
+
+        setOneDayLeftTasks(oneDayTasks);
+        setOneWeekLeftTasks(oneWeekTasks);
+      } catch (error) {
+        console.log("Error fetching tasks:", error); // Log error
+        setErrorTasks('Failed to fetch tasks');
+      } finally {
+        setLoadingTasks(false);  // Stop loading state after fetching
       }
     };
 
-    fetchGroupedTasks();
-  }, [status]);
+    // Trigger fetchGroupedTasks based on session or manual token
+    if (status === 'authenticated' || token) {
+      fetchGroupedTasks();
+    }
+  }, [status, token]);
+
+  
 
   useEffect(() => {
     const interval = setInterval(() => {

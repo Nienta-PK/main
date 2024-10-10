@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from utils.models import Login_History, Weekday
+from utils.models import Login_History, Weekday, User
 from utils.deps import db_dependency
 from pydantic import BaseModel
 import logging
+from datetime import timedelta, datetime
 
 router = APIRouter(
     prefix='/data',
@@ -68,3 +69,28 @@ def get_login_history_by_user(user_id: int, db: db_dependency):
     ]
     return results
 
+# Pydantic model for request validation
+class LoginHistoryRequest(BaseModel):
+    user_id: int
+
+@router.post("/login-history-stamp")
+def log_login_history(request: LoginHistoryRequest, db:db_dependency):
+    # Get the current date and time with timezone adjustment
+    current_time = datetime.utcnow() + timedelta(hours=7)
+    weekday = current_time.isoweekday()  # ISO weekday: Monday=1, Sunday=7
+
+    # Log login history
+    login_history = Login_History(
+        user_id=request.user_id,
+        time=current_time.time(),  # Store only time
+        day=current_time.day,
+        month=current_time.month,
+        year=current_time.year,
+        weekday_id=weekday  # Use ISO weekday directly if it matches Weekday table ids
+    )
+
+    # Add the login history entry to the database
+    db.add(login_history)
+    db.commit()  # Commit the login history to the database
+
+    return {"message": "Login history logged successfully"}

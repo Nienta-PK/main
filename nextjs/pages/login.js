@@ -95,7 +95,7 @@ export default function Login() {
           variant="outlined"
           fullWidth
           sx={{ marginTop: 2 }}
-          onClick={() => signIn('google', { callbackUrl: '/home'})}
+          onClick={() => signIn('google', { callbackUrl: '/stamp'})}
         >
           <GoogleIcon sx={{ marginRight: 2 }} />Sign in with Google
         </Button>
