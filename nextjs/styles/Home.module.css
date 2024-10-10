@@ -1,79 +1,138 @@
-/* Home.module.css */
 .container {
-    padding: 20px;
-    max-width: 1000px;
-    margin: 0 auto;
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
-  .title {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .actions {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 30px;
-  }
-  
-  .button {
-    padding: 12px 20px;
-    background-color: #0070f3;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .buttonOutline {
-    padding: 12px 20px;
-    background-color: #fff;
-    color: #0070f3;
-    border: 2px solid #0070f3;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .subtitle {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: #555;
-  }
-  
-  .taskGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  
-  .taskCard {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: left;
-  }
-  
-  .taskTitle {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  .taskStatus {
-    font-size: 1rem;
-  }
-  
-  .errorText {
-    color: red;
-    font-weight: bold;
-  }
-  
+  padding: 20px;
+  width: 100%;
+  max-width: 1200px; /* Increased max-width for larger tables */
+  margin: 0 auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  overflow-x: auto; /* Allow horizontal scrolling if content exceeds container width */
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.button {
+  padding: 12px 20px;
+  background-color: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #005bb5;
+}
+
+.buttonOutline {
+  padding: 12px 20px;
+  background-color: #fff;
+  color: #0070f3;
+  border: 2px solid #0070f3;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buttonOutline:hover {
+  background-color: #0070f3;
+  color: #fff;
+}
+
+.subtitle {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Adjusted Box and Table Styles */
+.tableContainer {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* Add horizontal scroll for smaller screens */
+}
+
+.taskTable {
+  width: 100%;
+  max-width: 100%; /* Ensure table does not exceed container */
+  border-collapse: collapse;
+}
+
+.taskTable th,
+.taskTable td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.taskTable th {
+  background-color: #0070f3;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.taskTable td {
+  background-color: #fff;
+  font-size: 0.95rem;
+}
+
+.taskTable tr:hover {
+  background-color: #f1f1f1;
+}
+
+.taskGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.taskCard {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.taskTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.taskStatus {
+  font-size: 1rem;
+}
+
+.errorText {
+  color: red;
+  font-weight: bold;
+}
+
+/* Adjusted box for better alignment */
+.box {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  max-width: 1000px;
+  margin: 20px auto;
+  overflow-x: auto; /* Add horizontal scroll for smaller screens */
+}

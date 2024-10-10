@@ -23,10 +23,8 @@ export default function CreateTask() {
   const [isImportant, setIsImportant] = useState(false); // State for the important checkbox
   const [categories, setCategories] = useState([]);
   const [priorities, setPriorities] = useState([]);
-  const [statuses, setStatuses] = useState([]);
   const [categoryId, setCategoryId] = useState(''); // Selected category_id
   const [priorityId, setPriorityId] = useState(''); // Selected priority_id
-  const [statusId, setStatusId] = useState(''); // Selected status_id
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,23 +34,20 @@ export default function CreateTask() {
     // Fetch categories, priorities, and statuses from the backend
     const fetchData = async () => {
       try {
-        const [categoriesRes, prioritiesRes, statusesRes] = await Promise.all([
+        const [categoriesRes, prioritiesRes] = await Promise.all([
           fetch('http://localhost:8000/algo/categories'),
           fetch('http://localhost:8000/algo/priorities'),
-          fetch('http://localhost:8000/algo/statuses'),
         ]);
 
-        if (!categoriesRes.ok || !prioritiesRes.ok || !statusesRes.ok) {
+        if (!categoriesRes.ok || !prioritiesRes.ok) {
           throw new Error('Failed to fetch select options.');
         }
 
         const categoriesData = await categoriesRes.json();
         const prioritiesData = await prioritiesRes.json();
-        const statusesData = await statusesRes.json();
 
         setCategories(categoriesData);
         setPriorities(prioritiesData);
-        setStatuses(statusesData);
       } catch (error) {
         console.error(error);
         setError('Failed to load form options.');
@@ -73,7 +68,17 @@ export default function CreateTask() {
       return;
     }
 
+    // Get the user_id from localStorage
+    const user_id = localStorage.getItem('user_id'); // Assumes user_id is stored in localStorage
+
+    if (!user_id) {
+      setError('User not logged in.');
+      setLoading(false);
+      return;
+    }
+
     const taskData = {
+      user_id,
       title,
       description,
       due_date: dueDate,
@@ -81,11 +86,10 @@ export default function CreateTask() {
       is_important: isImportant,
       category_id: categoryId,
       priority_id: priorityId,
-      status_id: statusId,
     };
 
     try {
-      const res = await fetch('http://localhost:8000/tasks', {
+      const res = await fetch('http://localhost:8000/algo/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,23 +191,6 @@ export default function CreateTask() {
               {priorities.map((priority) => (
                 <MenuItem key={priority.priority_id} value={priority.priority_id}>
                   {priority.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth margin="dense" size="small" sx={{ marginBottom: 1 }}>
-            <InputLabel id="statusLabel">Status *</InputLabel>
-            <Select
-              labelId="statusLabel"
-              value={statusId}
-              onChange={(e) => setStatusId(e.target.value)}
-              required
-              MenuProps={menuProps} // Add scrollbar if menu exceeds height
-            >
-              {statuses.map((status) => (
-                <MenuItem key={status.status_id} value={status.status_id}>
-                  {status.name}
                 </MenuItem>
               ))}
             </Select>
