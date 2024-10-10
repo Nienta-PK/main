@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { Modal, Box, Typography, Button } from '@mui/material';
+import axios from 'axios';
 
-// Localizer to use date-fns for calendar
 const locales = {
   'en-US': enUS,
 };
@@ -13,53 +13,45 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }), // week starts on Sunday
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
   getDay,
   locales,
 });
 
-// Sample events data with description, start date/time, and end date/time
-const events = [
-  {
-    id: 0,
-    title: 'Team Meeting',
-    start: new Date(2024, 9, 11, 10, 0), // October 11, 2024 at 10:00 AM
-    end: new Date(2024, 9, 11, 11, 30),  // October 11, 2024 at 11:30 AM
-    description: 'Discuss project updates and deadlines.',
-  },
-  {
-    id: 1,
-    title: 'Project Deadline',
-    start: new Date(2024, 9, 14, 8, 0),  // October 14, 2024 at 8:00 AM
-    end: new Date(2024, 9, 14, 23, 59),  // October 14, 2024 at 11:59 PM
-    description: 'Complete the final submission of the project.',
-  },
-  {
-    id: 2,
-    title: 'Workshop',
-    start: new Date(2024, 9, 16, 12, 0), // October 16, 2024 at 12:00 PM
-    end: new Date(2024, 9, 16, 15, 0),  // October 16, 2024 at 3:00 PM
-    description: 'Attend the UI/UX workshop for skill improvement.',
-  },
-];
-
 export default function MyCalendar() {
-  const [calendarEvents] = useState(events);
+  const [calendarEvents, setCalendarEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  
+  useEffect(() => {
+    // Fetch tasks from FastAPI backend
+    const currentUserId = localStorage.getItem('user_id')
+    axios.get(`http://localhost:8000/task-for-calendar?user_id=${currentUserId}`)
+    .then(response => {
+      const events = response.data.map(task => ({
+        id: task.task_id,
+        title: task.title,
+        description: task.description,
+        start: new Date(task.due_date),
+        end: new Date(task.due_date),
+      }));
+      setCalendarEvents(events);
+    })
+    .catch(error => console.error('Error fetching tasks:', error));
+  }, []);
 
   const handleEventClick = (event) => {
-    setSelectedEvent(event); // Set the clicked event
-    setModalOpen(true); // Open the modal
+    setSelectedEvent(event);
+    setModalOpen(true);
   };
 
   const handleModalClose = () => {
-    setModalOpen(false); // Close the modal
-    setSelectedEvent(null); // Clear the selected event
+    setModalOpen(false);
+    setSelectedEvent(null);
   };
 
-  const formatDate = (date) => format(date, 'PP'); // Format date (e.g., Oct 11, 2024)
-  const formatTime = (date) => format(date, 'p');  // Format time (e.g., 10:00 AM)
+  const formatDate = (date) => format(date, 'PP');
+  const formatTime = (date) => format(date, 'p');
 
   return (
     <div style={styles.container}>
@@ -70,10 +62,9 @@ export default function MyCalendar() {
         startAccessor="start"
         endAccessor="end"
         style={{ height: 500, margin: '50px' }}
-        onSelectEvent={handleEventClick} // Event handler for clicking an event
+        onSelectEvent={handleEventClick}
       />
 
-      {/* Modal for Event Details */}
       <Modal open={modalOpen} onClose={handleModalClose} aria-labelledby="event-modal-title">
         <Box sx={modalStyle}>
           {selectedEvent && (
