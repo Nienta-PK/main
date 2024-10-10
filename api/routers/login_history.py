@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
-from utils.models import Login_History, Weekday, User
+from utils.models import Login_History, Weekday
 from utils.deps import db_dependency
 from pydantic import BaseModel
 import logging
