@@ -22,7 +22,6 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import FunctionsIcon from '@mui/icons-material/Functions';
 import PersonIcon from '@mui/icons-material/Person';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -31,15 +30,34 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import CloseIcon from '@mui/icons-material/Close';
 import GridOnIcon from '@mui/icons-material/GridOn';
-import useBearStore from '@/store/useBearStore';
 import { signOut } from 'next-auth/react';
+
+const NavigationLink = ({ href, label }) => {
+  return (
+    <Link href={href} style={{ textDecoration: 'none' }}>
+      <Typography
+        variant="body1"
+        sx={{
+          fontSize: '14px',
+          fontWeight: 500,
+          color: '#ffffff',
+          padding: '0 10px',
+        }}
+      >
+        {label}
+      </Typography>
+    </Link>
+  );
+};
 
 const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCustomCursor }) => {
   const router = useRouter();
-  const appName = useBearStore((state) => state.appName);
 
   // State to control the drawer
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  // Check if the user is an admin
+  const isAdmin = typeof window !== 'undefined' && localStorage.getItem('is_admin') === 'true';
 
   const handleNavigation = (path) => {
     setDrawerOpen(false);
@@ -129,6 +147,19 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
           </AccordionDetails>
         </Accordion>
 
+        {/* Conditionally render Users Management link if the user is an admin */}
+        {isAdmin && (
+          <>
+            <Divider />
+            <ListItem button onClick={() => handleNavigation('/all_user_data')}>
+              <ListItemIcon>
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary="Users Management" />
+            </ListItem>
+          </>
+        )}
+
         <ListItem
           button
           onClick={() => {
@@ -168,7 +199,7 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
               fontFamily: 'Prompt',
             }}
           >
-            {appName} {darkMode ? '(Dark Mode)' : '(Light Mode)'}
+            My Task Management
           </Typography>
 
           {/* Navigation Links */}
@@ -199,24 +230,6 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
         {drawerContent}
       </Drawer>
     </>
-  );
-};
-
-const NavigationLink = ({ href, label }) => {
-  return (
-    <Link href={href} style={{ textDecoration: 'none' }}>
-      <Typography
-        variant="body1"
-        sx={{
-          fontSize: '14px',
-          fontWeight: 500,
-          color: '#ffffff',
-          padding: '0 10px',
-        }}
-      >
-        {label}
-      </Typography>
-    </Link>
   );
 };
 
