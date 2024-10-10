@@ -11,8 +11,9 @@ import {
   Button,
 } from '@mui/material';  // Import MUI Dialog components
 import styles from '../styles/UserTable.module.css';  // Import the CSS module
+import withAuth from '@/hoc/withAuth';
 
-export default function UsersTable() {
+function UsersTable() {
   const [searchUsername, setSearchUsername] = useState(''); // Username search state
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -205,3 +206,4 @@ export default function UsersTable() {
   );
 }
 
+export default withAuth(UsersTable);

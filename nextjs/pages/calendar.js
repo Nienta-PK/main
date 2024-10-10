@@ -5,6 +5,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { Modal, Box, Typography, Button } from '@mui/material';
 import axios from 'axios';
+import withAuth from '@/hoc/withAuth';
 
 const locales = {
   'en-US': enUS,
@@ -18,7 +19,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-export default function MyCalendar() {
+function MyCalendar() {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -119,3 +120,5 @@ const modalStyle = {
   boxShadow: 24,
   p: 4,
 };
+
+export default withAuth(MyCalendar);

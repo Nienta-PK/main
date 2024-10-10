@@ -14,8 +14,9 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
+import withAuth from '@/hoc/withAuth';
 
-export default function CreateTask() {
+function CreateTask() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(''); // For due date
@@ -255,3 +256,4 @@ export default function CreateTask() {
     </Box>
   );
 }
+export default withAuth(CreateTask);

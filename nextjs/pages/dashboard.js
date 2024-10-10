@@ -9,6 +9,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, ResponsiveContainer } from 'recharts';
 import styles from '../styles/Dashboard.module.css';
 import axios from 'axios'; // Import axios
+import withAuth from '@/hoc/withAuth';
 
 // API call function to fetch data using axios, including user_id from localStorage
 const fetchDashboardData = async () => {
@@ -33,7 +34,7 @@ const fetchDashboardData = async () => {
   }
 };
 
-export default function Dashboard() {
+function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -218,3 +219,4 @@ export default function Dashboard() {
     </Box>
   );
 }
+export default withAuth(Dashboard);

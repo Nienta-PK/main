@@ -31,6 +31,7 @@ import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import CloseIcon from '@mui/icons-material/Close';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import { signOut } from 'next-auth/react';
+import HistoryIcon from '@mui/icons-material/History';
 
 const NavigationLink = ({ href, label }) => {
   return (
@@ -156,6 +157,12 @@ const NavigationLayout = ({ darkMode, toggleTheme, customCursorEnabled, toggleCu
                 <PersonIcon />
               </ListItemIcon>
               <ListItemText primary="Users Management" />
+            </ListItem>
+            <ListItem button onClick={() => handleNavigation('/login-history')}>
+              <ListItemIcon>
+                <HistoryIcon />
+              </ListItemIcon>
+              <ListItemText primary="Login History" />
             </ListItem>
           </>
         )}

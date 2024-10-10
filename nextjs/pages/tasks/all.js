@@ -17,8 +17,9 @@ import {
   Alert
 } from '@mui/material';
 import styles from '../../styles/UserTable.module.css';
+import withAuth from '@/hoc/withAuth';
 
-export default function TasksTable() {
+function TasksTable() {
   const [searchTitle, setSearchTitle] = useState(''); // Title search state
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);  // State for category options
@@ -349,3 +350,4 @@ export default function TasksTable() {
     </div>
   );
 }
+export default withAuth(TasksTable);

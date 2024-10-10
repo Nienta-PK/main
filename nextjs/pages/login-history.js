@@ -1,6 +1,7 @@
 // pages/login-history.js
 import { useEffect, useState } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, useTheme } from '@mui/material';
+import withAuth from '@/hoc/withAuth';
 
 const LoginHistoryPage = () => {
   const [loginHistory, setLoginHistory] = useState([]);
@@ -81,4 +82,4 @@ const LoginHistoryPage = () => {
   );
 };
 
-export default LoginHistoryPage;
+export default withAuth(LoginHistoryPage);
