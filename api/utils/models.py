@@ -43,7 +43,7 @@ class Category(Base):
     __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False, unique=True)
-    description = Column(Text, nullable=True) # work, personal, project
+    description = Column(Text, nullable=True) # Personal, Homework, Exercise, Project, Work, Chores, Study, Shopping, Health, Finance, Entertainment, Travel, Maintenance, Social
     
     tasks = relationship("Task", back_populates="category")
 
@@ -51,7 +51,7 @@ class Category(Base):
 class Priority(Base):
     __tablename__ = 'priorities'
     priority_id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False, unique=True)  # e.g., Urgent, High Priority, Low Priority
+    name = Column(String(50), nullable=False, unique=True)  # e.g., Urgent, High Priority, Medium Priority,Low Priority
 
     tasks = relationship("Task", back_populates="priority")
 
@@ -59,7 +59,7 @@ class Priority(Base):
 class Status(Base):
     __tablename__ = 'statuses'
     status_id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False, unique=True)  # e.g., Ongoing, Completed, Delay, Abandoned, Pending?
+    name = Column(String(50), nullable=False, unique=True)  # e.g., Ongoing, Completed, Delay, Abandoned, Late
 
     tasks = relationship("Task", back_populates="status")
 

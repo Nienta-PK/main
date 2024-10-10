@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from routers import crud, auth, register, login, route_protector, login_history, user_by_email
-from routers_algo import all_user_data, default_chioce, create_task,all_task_data
+from routers_algo import all_user_data, default_chioce, create_task,all_task_data, due_today, dashboard
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from routers import crud, auth, register, login, route_protector
@@ -87,3 +87,5 @@ app.include_router(all_user_data.router)
 app.include_router(default_chioce.router)
 app.include_router(create_task.router)
 app.include_router(all_task_data.router)
+app.include_router(due_today.router)
+app.include_router(dashboard.router)

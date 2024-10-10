@@ -1,36 +1,49 @@
 import { useEffect, useState } from 'react';
-import { Container, Grid, Paper, Typography, Box, Button, Tooltip } from '@mui/material';
+import { Container, Grid, Paper, Typography, Box, Tooltip } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import TaskIcon from '@mui/icons-material/Task';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error'; // New icon for missing tasks
+import ErrorIcon from '@mui/icons-material/Error';
+import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, ResponsiveContainer } from 'recharts';
+import styles from '../styles/Dashboard.module.css';
+import axios from 'axios'; // Import axios
 
-// Mock API call function for stats and recent tasks
+// API call function to fetch data using axios, including user_id from localStorage
 const fetchDashboardData = async () => {
-  return {
-    stats: {
-      totalTasks: 450,
-      completedTasks: 320,
-    },
-    recentTasks: [
-      { id: 1, title: "Complete Project Proposal", is_completed: true },
-      { id: 2, title: "Design Wireframe", is_completed: false },
-      { id: 3, title: "Team Meeting", is_completed: true },
-    ],
-  };
+  try {
+    const user_id = localStorage.getItem('user_id'); // Retrieve user_id from localStorage
+
+    if (!user_id) {
+      throw new Error('User ID not found in localStorage');
+    }
+
+    const response = await axios.get(`http://localhost:8000/algo/tasks-overview`, {
+      params: {
+        user_id: user_id, // Pass user_id as a query parameter
+      },
+    });
+
+    console.log("API Response:", response);  // Log the full response for debugging
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error.response ? error.response.data : error.message);  // Log detailed error info
+    return null;
+  }
 };
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
+  
   useEffect(() => {
     const loadDashboardData = async () => {
       const data = await fetchDashboardData();
-      setDashboardData(data);
+      if (data) {
+        setDashboardData(data);
+      }
       setLoading(false);
     };
     loadDashboardData();
@@ -41,156 +54,167 @@ export default function Dashboard() {
       setCurrentDateTime(new Date());
     }, 1000); // Update time every second
 
-    // Clear the interval when component is unmounted
     return () => clearInterval(interval);
   }, []);
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
       </Box>
     );
   }
 
-  // Calculate missing tasks (total tasks - completed tasks)
-  const missingTasks = dashboardData.stats.totalTasks - dashboardData.stats.completedTasks;
+  if (!dashboardData || !dashboardData.tasks || !dashboardData.category_counts || !dashboardData.priority_counts || !dashboardData.status_counts) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Typography variant="h6" color="error">
+          Failed to load dashboard data.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Defensive checks to avoid undefined length error
+  const totalTasks = dashboardData.tasks ? dashboardData.tasks.length : 0;
+  const completedTasks = dashboardData.tasks
+    ? dashboardData.tasks.filter(task => task.status === 'Completed').length
+    : 0;
+  const missingTasks = totalTasks - completedTasks;
+
+  // Data for charts (with default empty arrays if undefined)
+  const categoryData = dashboardData.category_counts
+    ? Object.entries(dashboardData.category_counts).map(([name, value]) => ({ name, value }))
+    : [];
+  const priorityData = dashboardData.priority_counts
+    ? Object.entries(dashboardData.priority_counts).map(([name, value]) => ({ name, value }))
+    : [];
+  const statusData = dashboardData.status_counts
+    ? Object.entries(dashboardData.status_counts).map(([name, value]) => ({ name, value }))
+    : [];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
-    <Container style={styles.container}>
-      <Box style={styles.header}>
-        <Typography variant="h4" gutterBottom>
-          Dashboard Overview
-        </Typography>
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="#121212"  // Example background color for the whole page
+    >
+      <Container className={styles.container}>
+        <Box className={styles.header}>
+          <Typography variant="h4" gutterBottom>
+            Dashboard Overview
+          </Typography>
 
-        {/* Display current date and time with icons */}
-        <Box display="flex" alignItems="center" mt={2}>
-          <DateRangeIcon style={styles.icon} />
-          <Typography variant="h6" gutterBottom style={styles.date}>
-            {currentDateTime.toLocaleDateString()}
-          </Typography>
-          <AccessTimeIcon style={styles.icon} />
-          <Typography variant="h6" gutterBottom style={styles.time}>
-            {currentDateTime.toLocaleTimeString()}
-          </Typography>
+          {/* Display current date and time with icons */}
+          <Box display="flex" alignItems="center" mt={2}>
+            <DateRangeIcon className={styles.icon} />
+            <Typography variant="h6" gutterBottom className={styles.date}>
+              {currentDateTime.toLocaleDateString()}
+            </Typography>
+            <AccessTimeIcon className={styles.icon} />
+            <Typography variant="h6" gutterBottom className={styles.time}>
+              {currentDateTime.toLocaleTimeString()}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
 
-      <Grid container spacing={3}>
-        {/* Missing Tasks */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={styles.statCard}>
-            <Tooltip title="Number of tasks that are not completed">
-              <ErrorIcon style={styles.iconLarge} />
-            </Tooltip>
-            <Typography variant="h6" color="textSecondary">
-              Missing Tasks
-            </Typography>
-            <Typography variant="h4">{missingTasks}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={styles.statCard}>
-            <Tooltip title="Total number of tasks created">
-              <TaskIcon style={styles.iconLarge} />
-            </Tooltip>
-            <Typography variant="h6" color="textSecondary">
-              Total Tasks
-            </Typography>
-            <Typography variant="h4">{dashboardData.stats.totalTasks}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={3} style={styles.statCard}>
-            <Tooltip title="Total number of completed tasks">
-              <CheckCircleIcon style={styles.iconLarge} />
-            </Tooltip>
-            <Typography variant="h6" color="textSecondary">
-              Completed Tasks
-            </Typography>
-            <Typography variant="h4">{dashboardData.stats.completedTasks}</Typography>
-          </Paper>
-        </Grid>
+        <Grid container spacing={3}>
+          {/* Missing Tasks */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Tooltip title="Number of tasks that are not completed">
+                <ErrorIcon className={styles.iconLarge} />
+              </Tooltip>
+              <Typography variant="h6" color="textSecondary">
+                Missing Tasks
+              </Typography>
+              <Typography variant="h4">{missingTasks}</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Tooltip title="Total number of tasks created">
+                <TaskIcon className={styles.iconLarge} />
+              </Tooltip>
+              <Typography variant="h6" color="textSecondary">
+                Total Tasks
+              </Typography>
+              <Typography variant="h4">{totalTasks}</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Tooltip title="Total number of completed tasks">
+                <CheckCircleIcon className={styles.iconLarge} />
+              </Tooltip>
+              <Typography variant="h6" color="textSecondary">
+                Completed Tasks
+              </Typography>
+              <Typography variant="h4">{completedTasks}</Typography>
+            </Paper>
+          </Grid>
 
-        {/* Recent Tasks */}
-        <Grid item xs={12}>
-          <Paper elevation={3} style={styles.paper}>
-            <Typography variant="h6" gutterBottom>
-              Recent Tasks
-            </Typography>
-            {dashboardData.recentTasks.length > 0 ? (
-              dashboardData.recentTasks.map((task) => (
-                <Typography key={task.id} variant="body1" style={styles.taskItem}>
-                  {task.title} - {task.is_completed ? 'Completed' : 'Pending'}
-                </Typography>
-              ))
-            ) : (
-              <Typography variant="body1">No recent tasks available.</Typography>
-            )}
-          </Paper>
-        </Grid>
+          {/* Chart for Task Distribution by Category */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Typography variant="h6" color="textSecondary">
+                Task Distribution by Category
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie data={categoryData} dataKey="value" nameKey="name" outerRadius={100}>
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Paper>
+          </Grid>
 
-        {/* Actions */}
-        <Grid item xs={12}>
-          <Paper elevation={3} style={styles.paper}>
-            <Typography variant="h6" gutterBottom>
-              Actions
-            </Typography>
-            <Box display="flex" justifyContent="space-between">
-              <Button variant="contained" color="primary" style={styles.button}>
-                Add New Task
-              </Button>
-              <Button variant="outlined" color="secondary" style={styles.button}>
-                View All Tasks
-              </Button>
-            </Box>
-          </Paper>
+          {/* Chart for Task Distribution by Priority */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Typography variant="h6" color="textSecondary">
+                Task Distribution by Priority
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={priorityData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Paper>
+          </Grid>
+
+          {/* Chart for Task Distribution by Status */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={3} className={styles.statCard}>
+              <Typography variant="h6" color="textSecondary">
+                Task Distribution by Status
+              </Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" outerRadius={100}>
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }
-
-const styles = {
-  container: {
-    marginTop: '30px',
-    marginBottom: '30px',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: '20px',
-  },
-  icon: {
-    marginRight: '8px',
-    color: '#3f51b5',
-  },
-  iconLarge: {
-    fontSize: '3rem',
-    marginBottom: '10px',
-    color: '#f44336', // Red color to indicate missing tasks
-  },
-  date: {
-    marginRight: '20px',
-  },
-  time: {
-    fontWeight: 'bold',
-  },
-  statCard: {
-    padding: '30px',
-    textAlign: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: '10px',
-  },
-  paper: {
-    padding: '20px',
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    borderRadius: '10px',
-  },
-  taskItem: {
-    padding: '5px 0',
-  },
-  button: {
-    padding: '10px 20px',
-  },
-};
