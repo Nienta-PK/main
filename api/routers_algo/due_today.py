@@ -25,12 +25,12 @@ router = APIRouter()
 
 # Modify the endpoint to filter ongoing tasks
 @router.get("/tasks/grouped", response_model=Dict[str, List[Dict]])
-def get_grouped_tasks(db: db_dependency):
+def get_grouped_tasks(user_id:int,db: db_dependency):
     # Assuming 'Ongoing' status has a status_id of 1 (you can adjust this based on your DB)
     ongoing_status_id = 1
     
     # Query only ongoing tasks
-    tasks = db.query(Task).filter(Task.status_id == ongoing_status_id).all()
+    tasks = db.query(Task).filter(Task.status_id == ongoing_status_id, Task.user_id == user_id).all()
 
     # Initialize groups
     grouped_tasks = {

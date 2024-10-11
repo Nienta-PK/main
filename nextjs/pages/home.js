@@ -57,8 +57,10 @@ function Home() {
       setLoadingTasks(true);  // Show loading state while fetching
 
       try {
+        const user_id = localStorage.getItem('user_id');
         const response = await axios.get('http://localhost:8000/tasks/grouped', {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
+          params: {user_id: user_id}
         });
         console.log("API response data:", response.data); // Log the response
 

@@ -18,7 +18,7 @@ class UserResponse(BaseModel):
     email: str
     is_active: bool
     is_admin: bool
-    create_date: str  # Expecting the date to be a string
+    create_date: str
 
     class Config:
         from_attribute = True
@@ -118,7 +118,7 @@ def delete_user(user_id: int, db: db_dependency):
     user_to_delete = db.query(User).filter(User.user_id == user_id).first()
 
     if user_to_delete:
-        db.delete(user_to_delete)  # Delete the user
+        db.delete(user_to_delete)  # Delete the user (Need fix CASCADE)
         db.commit()  # Commit the transaction
 
     # Return a success message

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Boolean, Time, Text
 from utils.database import Base
-import datetime
+import datetime 
 from sqlalchemy.orm import relationship
 
 class User(Base):
@@ -9,12 +9,12 @@ class User(Base):
     username = Column(String(50), nullable=False, unique=True)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(TIMESTAMP, nullable=False, default=datetime.datetime.utcnow()+datetime.timedelta(hours=7))
     is_active = Column(Boolean, nullable=False, default=True)
     is_admin = Column(Boolean, nullable=False, default=False)
     
     login_history = relationship("Login_History", back_populates="user", cascade="all, delete-orphan")
-    tasks = relationship("Task", back_populates="user")
+    tasks = relationship("Task", back_populates="user",cascade="all, delete-orphan")
 
 
 class Login_History(Base):

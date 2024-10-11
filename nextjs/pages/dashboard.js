@@ -81,7 +81,9 @@ function Dashboard() {
   const completedTasks = dashboardData.tasks
     ? dashboardData.tasks.filter(task => task.status === 'Completed').length
     : 0;
-  const missingTasks = totalTasks - completedTasks;
+  const missingTasks = dashboardData.tasks
+  ? dashboardData.tasks.filter(task => task.status === 'Delayed').length
+  : 0;
 
   // Data for charts (with default empty arrays if undefined)
   const categoryData = dashboardData.category_counts

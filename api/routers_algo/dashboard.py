@@ -43,7 +43,7 @@ def merge_sort(tasks, key):
     mid = len(tasks) // 2
     left_half = merge_sort(tasks[:mid], key)
     right_half = merge_sort(tasks[mid:], key)
-
+    
     return merge(left_half, right_half, key)
 
 def merge(left, right, key):
